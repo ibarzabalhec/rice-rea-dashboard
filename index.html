@@ -111,6 +111,10 @@
     letter-spacing: -0.02em;
   }
   .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stat-card[data-cardfilter] { cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s; }
+  .stat-card[data-cardfilter]:hover { border-color: var(--rice-blue); transform: translateY(-1px); }
+  .stat-card.card-filter-on { border: 2px solid var(--rice-blue); background: #F3F6FB; padding: 13px 15px; }
+  .stat-card.card-filter-on .stat-sub::after { content: " · filtering — click to clear"; color: var(--rice-blue); font-weight: 600; }
 
   /* Tabs */
   .tabs {
@@ -487,32 +491,32 @@
 
 <!-- Stats -->
 <div class="stats-grid">
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="total" onclick="toggleCardFilter('total')" title="Show all prospects (clears filters)">
     <div class="stat-label">Total Prospects</div>
     <div class="stat-value" id="stat-total">—</div>
     <div class="stat-sub" id="stat-total-sub">across 5 sectors</div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="tierA" onclick="toggleCardFilter('tierA')" title="Filter to Tier A and A+">
     <div class="stat-label">Tier A / A+</div>
     <div class="stat-value" id="stat-tier-a">—</div>
     <div class="stat-sub">must-have targets</div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="rice" onclick="toggleCardFilter('rice')" title="Filter to strong/medium Rice ties">
     <div class="stat-label">Rice Alumni Tie</div>
     <div class="stat-value" id="stat-rice">—</div>
     <div class="stat-sub">warm intro possible</div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="houston" onclick="toggleCardFilter('houston')" title="Filter to Houston-based firms">
     <div class="stat-label">Houston-Based</div>
     <div class="stat-value" id="stat-houston">—</div>
     <div class="stat-sub">in-market access</div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="sitevisit" onclick="toggleCardFilter('sitevisit')" title="Filter to site-visit candidates">
     <div class="stat-label">Site Visit Candidates</div>
     <div class="stat-value" id="stat-sitevisit">—</div>
     <div class="stat-sub">campus-day-trip viable</div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" data-cardfilter="active" onclick="toggleCardFilter('active')" title="Filter to prospects in active outreach">
     <div class="stat-label">In Active Outreach</div>
     <div class="stat-value" id="stat-active">0</div>
     <div class="stat-sub">contacted or further</div>
@@ -996,6 +1000,25 @@ function renderStats() {
   document.getElementById('stat-active').textContent = active;
 }
 
+// ===== CARD FILTERS =====
+let cardFilter = null;
+const CARD_FILTERS = {
+  tierA: p => p.tier === 'A' || p.tier === 'A+',
+  rice: p => p.riceLevel === 'strong' || p.riceLevel === 'medium',
+  houston: p => p.hq.includes('Houston'),
+  sitevisit: p => p.asks.includes('Site visit'),
+  active: p => getStatus(makeId(p)) !== 'none'
+};
+function toggleCardFilter(f) {
+  if (f === 'total') { cardFilter = null; clearFilters(); }
+  else cardFilter = (cardFilter === f) ? null : f;
+  document.querySelectorAll('.stat-card[data-cardfilter]').forEach(el =>
+    el.classList.toggle('card-filter-on', el.dataset.cardfilter === cardFilter));
+  // jump to the Prospects tab so the filtered table is visible
+  if (currentTab !== 'prospects') document.querySelector('.tab[data-tab="prospects"]').click();
+  renderTable();
+}
+
 // ===== TABLE =====
 function renderTable() {
   const tbody = document.getElementById('tbody');
@@ -1006,6 +1029,7 @@ function renderTable() {
   const rice = document.getElementById('filter-rice').value;
 
   let rows = PROSPECTS.filter(p => {
+    if (cardFilter && CARD_FILTERS[cardFilter] && !CARD_FILTERS[cardFilter](p)) return false;
     if (sector && p.sector !== sector) return false;
     if (tier && p.tier !== tier) return false;
     if (ask && !p.asks.includes(ask)) return false;
@@ -1132,6 +1156,8 @@ function clearFilters() {
   document.getElementById('filter-tier').value = '';
   document.getElementById('filter-ask').value = '';
   document.getElementById('filter-rice').value = '';
+  cardFilter = null;
+  document.querySelectorAll('.stat-card[data-cardfilter]').forEach(el => el.classList.remove('card-filter-on'));
   renderTable();
 }
 
