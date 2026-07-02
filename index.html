@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rice REA — CRE Outreach Pipeline</title>
+<style>
+  :root {
+    --rice-blue: #00205B;
+    --rice-blue-2: #002B7F;
+    --rice-grey: #5E6A71;
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --border: #E4E7EB;
+    --text: #1C2024;
+    --muted: #6B7280;
+    --accent: #C8102E;
+    --tier-a: #00205B;
+    --tier-a-plus: #6A0DAD;
+    --tier-b: #2A7F62;
+    --tier-c: #8A6D3B;
+    --status-none: #9AA3AB;
+    --status-research: #2563EB;
+    --status-contacted: #D97706;
+    --status-replied: #7C3AED;
+    --status-confirmed: #047857;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header.app-header {
+    background: linear-gradient(135deg, var(--rice-blue) 0%, var(--rice-blue-2) 100%);
+    color: #fff;
+    padding: 28px 36px 24px;
+    box-shadow: var(--shadow);
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  .brand .tagline {
+    margin-top: 4px;
+    font-size: 13px;
+    opacity: 0.85;
+  }
+  .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn:hover { background: rgba(255,255,255,0.22); }
+  .btn-primary {
+    background: #fff;
+    color: var(--rice-blue);
+    border-color: #fff;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: #F0F4FB; }
+
+  main { padding: 24px 36px 64px; max-width: 1480px; margin: 0 auto; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--rice-blue);
+    margin-top: 4px;
+    letter-spacing: -0.02em;
+  }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: var(--shadow);
+    width: fit-content;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: transparent;
+    border: none;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab:hover { color: var(--text); background: var(--bg); }
+  .tab.active {
+    background: var(--rice-blue);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Filters */
+  .filters-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .filters-row {
+    display: grid;
+    grid-template-columns: 2fr repeat(5, 1fr);
+    gap: 12px;
+    align-items: end;
+  }
+  @media (max-width: 1100px) {
+    .filters-row { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  .filter-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .filter-group input, .filter-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  .filter-group input:focus, .filter-group select:focus {
+    outline: none;
+    border-color: var(--rice-blue);
+    box-shadow: 0 0 0 3px rgba(0, 32, 91, 0.1);
+  }
+  .filter-clear {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    height: 36px;
+  }
+  .filter-clear:hover { background: var(--bg); color: var(--text); }
+
+  /* Table */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .table-wrap { overflow-x: auto; max-height: 75vh; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #F2F4F7; position: sticky; top: 0; z-index: 2; }
+  th {
+    text-align: left;
+    padding: 11px 14px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { background: #E8ECF1; color: var(--text); }
+  th .sort-indicator { font-size: 10px; opacity: 0.4; margin-left: 4px; }
+  th.sorted-asc .sort-indicator, th.sorted-desc .sort-indicator { opacity: 1; color: var(--rice-blue); }
+  td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFBFC; }
+  td.company-cell { font-weight: 600; min-width: 180px; }
+  td.company-cell .hq { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  td.notes-cell { min-width: 280px; font-size: 12.5px; color: var(--rice-grey); }
+  td.rice-cell { min-width: 220px; font-size: 12.5px; }
+  td.tx-cell { min-width: 180px; font-size: 12.5px; color: var(--rice-grey); }
+
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .tier-A { background: rgba(0, 32, 91, 0.1); color: var(--tier-a); }
+  .tier-Aplus { background: rgba(106, 13, 173, 0.12); color: var(--tier-a-plus); }
+  .tier-B { background: rgba(42, 127, 98, 0.12); color: var(--tier-b); }
+  .tier-C { background: rgba(138, 109, 59, 0.12); color: var(--tier-c); }
+  .sector-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #F0F4F9;
+    color: var(--rice-blue);
+  }
+  .sector-Traditional { background: #E8EFF8; color: #1E3A8A; }
+  .sector-PropTech { background: #FDF4E3; color: #92400E; }
+  .sector-Hospitality { background: #FCE8EE; color: #9F1239; }
+  .sector-Industrial { background: #E6F4EA; color: #15803D; }
+  .sector-Houston-Rice { background: #F0E6FA; color: #6B21A8; }
+
+  .ask-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #F3F4F6;
+    color: var(--rice-grey);
+    font-size: 10.5px;
+    margin: 1px 2px 1px 0;
+    font-weight: 500;
+  }
+  .rice-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 10.5px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .rice-badge.strong { background: var(--rice-blue); color: #fff; }
+
+  /* Status selector */
+  .status-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    min-width: 110px;
+  }
+  .status-none { background: #F3F4F6; color: var(--status-none); }
+  .status-research { background: #DBEAFE; color: var(--status-research); }
+  .status-contacted { background: #FED7AA; color: var(--status-contacted); }
+  .status-replied { background: #E9D5FF; color: var(--status-replied); }
+  .status-confirmed { background: #D1FAE5; color: var(--status-confirmed); }
+
+  /* Kanban */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    overflow-x: auto;
+  }
+  @media (max-width: 1100px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+  .kanban-col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    min-height: 200px;
+  }
+  .kanban-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 13px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border); margin-bottom: 10px;
+  }
+  .kanban-count {
+    font-size: 11px;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kanban-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    box-shadow: var(--shadow);
+  }
+  .kanban-item .company-name { font-weight: 600; }
+  .kanban-item .item-meta { color: var(--muted); font-size: 11px; margin-top: 3px; }
+
+  /* Strategy */
+  .strategy-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .strategy-section h2 {
+    margin: 0 0 12px;
+    color: var(--rice-blue);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .strategy-section h3 {
+    color: var(--rice-blue);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 18px 0 6px;
+  }
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .strategy-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .strategy-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--rice-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .strategy-card-body { font-size: 12.5px; line-height: 1.55; color: var(--text); }
+  .strategy-card-body ul { margin: 6px 0 0; padding-left: 18px; }
+  .strategy-card-body li { margin-bottom: 3px; }
+
+  .template-box {
+    background: #FAFBFC;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--rice-blue);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    color: #1F2937;
+  }
+  .copy-btn {
+    background: var(--rice-blue);
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .copy-btn:hover { background: var(--rice-blue-2); }
+
+  .source-link {
+    color: var(--rice-blue);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .source-link:hover { text-decoration: underline; }
+
+  /* Hidden */
+  .hidden { display: none !important; }
+
+  /* Footer */
+  footer { text-align: center; color: var(--muted); font-size: 11px; padding: 24px; }
+  footer a { color: var(--muted); }
+
+  /* Detail modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 14px; max-width: 720px; width: 100%;
+    max-height: 88vh; overflow-y: auto; box-shadow: 0 25px 70px rgba(0,0,0,0.25);
+  }
+  .modal-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  }
+  .modal-header h2 { margin: 0; color: var(--rice-blue); font-size: 19px; }
+  .modal-close {
+    background: transparent; border: none; cursor: pointer; font-size: 22px;
+    color: var(--muted); padding: 0; line-height: 1;
+  }
+  .modal-body { padding: 18px 24px 24px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field .label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px;
+  }
+  .modal-field .value { font-size: 13.5px; color: var(--text); }
+  .modal-section-title {
+    font-size: 12px; font-weight: 700; color: var(--rice-blue);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin: 18px 0 8px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-row">
+    <div class="brand">
+      <h1>Rice Real Estate Association — CRE Outreach Pipeline</h1>
+      <div class="tagline">Live prospect dashboard · External Relations · Last updated <span id="last-updated"></span></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" onclick="resetStatus()">Reset Status</button>
+      <button class="btn btn-primary" onclick="window.print()">Print View</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Prospects</div>
+    <div class="stat-value" id="stat-total">—</div>
+    <div class="stat-sub" id="stat-total-sub">across 5 sectors</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Tier A / A+</div>
+    <div class="stat-value" id="stat-tier-a">—</div>
+    <div class="stat-sub">must-have targets</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Rice Alumni Tie</div>
+    <div class="stat-value" id="stat-rice">—</div>
+    <div class="stat-sub">warm intro possible</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Houston-Based</div>
+    <div class="stat-value" id="stat-houston">—</div>
+    <div class="stat-sub">in-market access</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Site Visit Candidates</div>
+    <div class="stat-value" id="stat-sitevisit">—</div>
+    <div class="stat-sub">campus-day-trip viable</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">In Active Outreach</div>
+    <div class="stat-value" id="stat-active">0</div>
+    <div class="stat-sub">contacted or further</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" data-tab="prospects">Prospects</button>
+  <button class="tab" data-tab="pipeline">Pipeline Board</button>
+  <button class="tab" data-tab="strategy">Outreach Strategy</button>
+  <button class="tab" data-tab="templates">Email Templates</button>
+</div>
+
+<!-- PROSPECTS TAB -->
+<section id="tab-prospects" class="tab-content">
+
+  <div class="filters-card">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="search" placeholder="Company, city, hook, alumni…" />
+      </div>
+      <div class="filter-group">
+        <label>Sector</label>
+        <select id="filter-sector">
+          <option value="">All sectors</option>
+          <option value="Traditional">Traditional CRE / REIT</option>
+          <option value="PropTech">PropTech / ConTech</option>
+          <option value="Hospitality">Hospitality / Lifestyle</option>
+          <option value="Industrial">Industrial / Data / Starbase</option>
+          <option value="Houston-Rice">Houston / Rice Alumni</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Tier</label>
+        <select id="filter-tier">
+          <option value="">All tiers</option>
+          <option value="A+">A+ (must)</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Best Ask</label>
+        <select id="filter-ask">
+          <option value="">All asks</option>
+          <option value="Site visit">Site visit</option>
+          <option value="Speaker">Speaker</option>
+          <option value="Recruiting">Recruiting</option>
+          <option value="Sponsorship">Sponsorship</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Rice Tie</label>
+        <select id="filter-rice">
+          <option value="">All</option>
+          <option value="strong">Confirmed alumni</option>
+          <option value="any">Any Rice angle</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button class="filter-clear" onclick="clearFilters()">Clear filters</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="name">Company<span class="sort-indicator">▾</span></th>
+            <th data-sort="sector">Sector<span class="sort-indicator">▾</span></th>
+            <th data-sort="tier">Tier<span class="sort-indicator">▾</span></th>
+            <th data-sort="tx">Texas Presence<span class="sort-indicator">▾</span></th>
+            <th data-sort="ask">Best Asks<span class="sort-indicator">▾</span></th>
+            <th data-sort="rice">Rice Angle<span class="sort-indicator">▾</span></th>
+            <th data-sort="hook">Why Exciting<span class="sort-indicator">▾</span></th>
+            <th data-sort="status">Status<span class="sort-indicator">▾</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE TAB -->
+<section id="tab-pipeline" class="tab-content hidden">
+  <div class="strategy-section">
+    <h2>Pipeline Board</h2>
+    <p style="margin: 0 0 14px; color: var(--muted); font-size: 13px;">Track outreach progress visually. Change a prospect's status on the Prospects tab to move it here. Drag is not enabled — use the dropdown to update.</p>
+    <div class="kanban" id="kanban"></div>
+  </div>
+</section>
+
+<!-- STRATEGY TAB -->
+<section id="tab-strategy" class="tab-content hidden">
+  <div class="strategy-section">
+    <h2>The Big-Picture Approach</h2>
+    <p>You have ~110 prospects across five sectors. Trying to email every one of them with the same template is a guaranteed way to get zero replies. Here's the playbook to actually convert them.</p>
+
+    <h3>Three rules to live by</h3>
+    <ol>
+      <li><b>Lead with Rice alumni.</b> Every email to a firm where you have a confirmed Rice alum should mention it in the first sentence. That alone bumps reply rates 3–5x. Use the "Rice Angle" column to find them.</li>
+      <li><b>Match the ask to the firm.</b> Don't ask Crusoe for a $5K sponsorship on first contact and don't ask Wile Interests for a 100-person speaker night. The "Best Asks" column tells you what's realistic.</li>
+      <li><b>One ask per email.</b> If you want a speaker and a site visit and recruiting, send three emails over three months. Multi-ask emails read as needy and get deleted.</li>
+    </ol>
+  </div>
+
+  <div class="strategy-section">
+    <h2>Wave Strategy — 90-Day Rollout</h2>
+    <div class="strategy-grid">
+      <div class="strategy-card">
+        <div class="strategy-card-title">Wave 1 — Weeks 1–3 · Warm Rice Alumni</div>
+        <div class="strategy-card-body">
+          Email every Rice-alum-connected firm first. These are highest-yield. Expect 50%+ reply rate.
+          <ul>
+            <li>Lovett Commercial (Frank Liu '78)</li>
+            <li>Hines via Chris Rector (MBA '15)</li>
+            <li>NewQuest (Austin Alvis, MBA)</li>
+            <li>Triten (Zach Dobin MBA '20)</li>
+            <li>1912 Ventures (Bronstein '97)</li>
+            <li>Davis Commercial (Davis '89)</li>
+            <li>Burloc (Burks MBA '05)</li>
+            <li>Kavi Properties (Agrawal MBA '10)</li>
+            <li>Wile Interests (Wile, Rice alum)</li>
+            <li>Hanover Co. (Steffi Russell, Rice BA)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="strategy-card">
+        <div class="strategy-card-title">Wave 2 — Weeks 3–6 · Houston Civic Pillars</div>
+        <div class="strategy-card-body">
+          Houston-HQ firms where Rice carries weight even without a named alum. Aim for speakers + sponsorship.
+          <ul>
+            <li>Camden Property Trust</li>
+            <li>Midway (East River walk)</li>
+            <li>Transwestern</li>
+            <li>Lancium (Stargate land)</li>
+            <li>Polk Mechanical</li>
+            <li>Linbeck Group</li>
+            <li>Tellepsen</li>
+            <li>The Houstonian (venue partner)</li>
+            <li>Fertitta / Post Oak Hotel</li>
+            <li>Whitestone REIT</li>
+          </ul>
+        </div>
+      </div>
+      <div class="strategy-card">
+        <div class="strategy-card-title">Wave 3 — Weeks 6–10 · TX Marquee + Day-Trip Treks</div>
+        <div class="strategy-card-body">
+          Dallas / Austin / SA firms perfect for a chartered-bus trek. Combine 3–4 firms per city per trip.
+          <ul>
+            <li>Austin: Icon, Procore, Closinglock, MML, Endeavor, Hyatt Lifestyle office</li>
+            <li>Dallas: Crow Holdings, Hillwood (AllianceTexas), Trammell Crow, Omni/TRT, The Joule, Stream Data Centers</li>
+            <li>SA: Pearl (Silver Ventures), La Cantera</li>
+            <li>The Woodlands: Howard Hughes (Bridgeland tour)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="strategy-card">
+        <div class="strategy-card-title">Wave 4 — Weeks 10–13 · National Stretch Goals</div>
+        <div class="strategy-card-body">
+          Big-name virtual speakers. Low yield individually, but a single yes (e.g., Crusoe's Lochmiller) is a marquee event.
+          <ul>
+            <li>Crusoe (Stargate)</li>
+            <li>Bilt Rewards (Ankur Jain)</li>
+            <li>Compass (Robert Reffkin)</li>
+            <li>Juniper Square</li>
+            <li>VTS, HqO, Diamond Age</li>
+            <li>Hadrian (Chris Power)</li>
+            <li>Bedrock Robotics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strategy-section">
+    <h2>KPIs to Track</h2>
+    <ul>
+      <li><b>Outreach volume</b> — emails sent per week (target: 10–15 personalized, never blast)</li>
+      <li><b>Reply rate</b> — % of emails that get any human response (good: 20%+, great: 40%+ for warm alums)</li>
+      <li><b>Conversion rate</b> — % of replies that become a confirmed engagement (speaker, visit, sponsor)</li>
+      <li><b>Pipeline value</b> — dollars committed in sponsorships + estimated value of speakers/treks delivered</li>
+      <li><b>Coverage</b> — % of Tier A prospects contacted by end of semester (target: 100%)</li>
+    </ul>
+    <h3>Cadence rules</h3>
+    <ul>
+      <li>Initial email → wait 7 business days → polite bump (different angle, not "just following up") → wait 14 days → final touch with a specific event date</li>
+      <li>Never email the same person 3 times without a yes/no. After three touches, switch contacts.</li>
+      <li>Track every send in this dashboard so the next REA officer doesn't restart cold.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- TEMPLATES TAB -->
+<section id="tab-templates" class="tab-content hidden">
+  <div class="strategy-section">
+    <h2>Email Templates</h2>
+    <p>Four templates, one per ask. Personalize the bracketed sections. Always include a specific date or a 2-week window — open-ended asks die in inboxes.</p>
+
+    <h3>Template 1 — Speaker (Rice Alumni Angle)</h3>
+    <div class="template-box" id="tpl-speaker-rice">Subject: Quick ask from a fellow Owl — Rice Real Estate Association
+
+Hi [First Name],
+
+I'm Héctor Ibarzábal, Head of External Relations for the Rice Real Estate Association. I noticed [Source: LinkedIn / Rice Business directory / news] that you're a Rice alum ([Class Year / Program]) — so first, hook 'em horns, beat the Aggies, etc.
+
+Our chapter has 100+ active undergrads and MBAs interested in CRE, and we'd love to host you for a 45-minute fireside chat this [fall / spring] semester. Two questions students would learn the most from you on:
+
+  • [Specific topic tied to their recent deal / project / press]
+  • [Career-path question relevant to current students]
+
+We can do it on campus or virtual. Looking at the weeks of [X and Y] — would either work?
+
+Thanks for considering it.
+
+Héctor
+Rice REA · ibarzabalhec@gmail.com</div>
+    <button class="copy-btn" onclick="copyText('tpl-speaker-rice')">Copy</button>
+
+    <h3>Template 2 — Site Visit / Trek</h3>
+    <div class="template-box" id="tpl-sitevisit">Subject: Rice Real Estate Association — site visit request, [Project Name]
+
+Hi [First Name],
+
+I'm Héctor, Head of External Relations for the Rice Real Estate Association. [Project Name] is one of the most-talked-about projects on our campus — I've heard [students / faculty member X] mention it three times this month.
+
+I'm organizing a small group (15–20 students, both undergrad and MBA) for a single afternoon site walk in [Houston / Austin / Dallas] on either [Date 1] or [Date 2]. Would your team be open to hosting us for ~90 minutes? We'd want to see the project and hear from whoever led [a specific aspect: design / capital stack / construction logistics].
+
+Happy to handle all logistics on our end. Let me know what works.
+
+Héctor
+Rice REA · ibarzabalhec@gmail.com</div>
+    <button class="copy-btn" onclick="copyText('tpl-sitevisit')">Copy</button>
+
+    <h3>Template 3 — Recruiting Pipeline</h3>
+    <div class="template-box" id="tpl-recruiting">Subject: Rice CRE pipeline — recruiting partnership exploration
+
+Hi [First Name],
+
+I'm Héctor, Head of External Relations for the Rice Real Estate Association. We have ~[N] students each year interested in CRE careers, split roughly [%] toward [development / finance / brokerage]. Several of last year's grads are now at [name-drop 1–2 peer firms if known].
+
+I'd love a 20-minute call to explore three things:
+  1. Whether your team would post analyst/internship roles directly with us each cycle
+  2. Whether you'd send a representative to our spring recruiting night
+  3. What we can do (case prep, panels, info sessions) to make Rice grads better candidates for [Firm Name]
+
+Open the week of [X] or [Y]?
+
+Héctor
+Rice REA · ibarzabalhec@gmail.com</div>
+    <button class="copy-btn" onclick="copyText('tpl-recruiting')">Copy</button>
+
+    <h3>Template 4 — Sponsorship</h3>
+    <div class="template-box" id="tpl-sponsorship">Subject: Rice Real Estate Association — partnership opportunity
+
+Hi [First Name],
+
+I'm Héctor, Head of External Relations for the Rice Real Estate Association. We're planning our [Event Name] for [Date] — last year it drew [N] students, [N] alumni, and speakers from [Firm A], [Firm B], and [Firm C].
+
+We have three sponsorship levels this year ($[X], $[Y], $[Z]). At the [recommended tier for them] level, [Firm Name] would get:
+
+  • [Specific benefit 1 — logo placement / panel slot / branded swag]
+  • [Specific benefit 2 — first-look at top student resumes]
+  • [Specific benefit 3 — dinner with featured speakers]
+
+If your team has a budget for student-org partnerships, I'd love a quick call to walk through it. Even a referral to the right person on your team would help.
+
+Héctor
+Rice REA · ibarzabalhec@gmail.com</div>
+    <button class="copy-btn" onclick="copyText('tpl-sponsorship')">Copy</button>
+
+    <h3>Template 5 — The Polite Bump (7 days later)</h3>
+    <div class="template-box" id="tpl-bump">Subject: Re: [Original Subject]
+
+Hi [First Name],
+
+Bumping this up in case it got buried. No rush at all — just want to flag that we're locking in [event / trek / sponsor list] by [specific date], and would love to include [Firm Name] if it's a fit.
+
+If it's not the right time, no problem — just let me know and I'll circle back next semester.
+
+Héctor</div>
+    <button class="copy-btn" onclick="copyText('tpl-bump')">Copy</button>
+  </div>
+</section>
+
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal') closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title"></h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<footer>
+  Rice Real Estate Association · Compiled May 2026 · Outreach status saved locally in your browser
+</footer>
+
+<script>
+const PROSPECTS = [
+  // ===== TRADITIONAL CRE / REITS =====
+  {name:"Hines", hq:"Houston, TX", sector:"Traditional", tier:"A", tx:"Global HQ Houston; new 7,000-home master-planned community in Fulshear; Montrose Collective", asks:["Site visit","Speaker","Recruiting","Sponsorship"], rice:"Chris Rector (MBA '15) is MD/COO Southwest; Gerald D. Hines endowed Rice Hines Associate Professor of RE Finance", riceLevel:"strong", hook:"$91.8B AUM; world's largest private RE firm; deepest Rice civic ties of any CRE firm", source:"https://www.hines.com/", contact:"Chris Rector — MD/COO Southwest US/Mexico/Central America", li:"https://www.linkedin.com/company/hines", liContacts:[{n:"Chris (Christopher) Rector",t:"Chief Operating Officer, Americas (formerly Co-CEO Southwest Region)",u:"https://www.linkedin.com/in/christopher-rector-aa39672a/",w:"Rice MBA '15; known target contact"},{n:"Melody Smith",t:"Global Talent Acquisition Director",u:"https://www.linkedin.com/in/melody-smith-b718b66/",w:"Heads TA globally; Houston-based"},{n:"Anthony Hidrogo",t:"Talent Acquisition Lead",u:"https://www.linkedin.com/in/anthonyhidrogo/",w:"Houston-based recruiter, approachable entry point"}]},
+  {name:"Howard Hughes Holdings", hq:"The Woodlands, TX", sector:"Traditional", tier:"A", tx:"Bridgeland, The Woodlands, Woodlands Hills; One Bridgeland Green mass-timber office under construction", asks:["Site visit","Speaker","Recruiting"], rice:"The Woodlands HQ — local civic; no confirmed Rice exec", riceLevel:"weak", hook:"Bridgeland #11 nationally in 2025 MPC sales; closed $2.1B Vantage Group insurance acquisition June 2026 — Ackman-led pivot to diversified holding co", source:"https://www.howardhughes.com/", contact:"Houston-area Bridgeland project leadership", li:"https://www.linkedin.com/company/the-howard-hughes-corporation", liContacts:[{n:"Jim Carman",t:"President, Texas Region",u:"https://www.linkedin.com/in/carmanjim/",w:"Leads Woodlands/Bridgeland Texas operations"},{n:"Ryan Brown",t:"SVP, Enterprise Applications",u:"https://www.linkedin.com/in/ryan-brown-48b1b436/",w:"Rice Business (Jones) alum at firm"},{n:"Andrew Ciarrocchi",t:"Senior Vice President, Management & Operations",u:"https://www.linkedin.com/in/andrew-ciarrocchi/",w:"Woodlands-based operations SVP"}]},
+  {name:"Camden Property Trust", hq:"Houston, TX", sector:"Traditional", tier:"A", tx:"Houston HQ; 173 properties, ~58,800 units; selling $1.5B+ CA portfolio to rotate into Sun Belt", asks:["Speaker","Recruiting","Sponsorship"], rice:"Ric Campo Houston civic figure; senior Houston leadership accessible to Rice", riceLevel:"medium", hook:"S&P 500 multifamily REIT; CEO transition complete — Alex Jessett CEO, Ric Campo Executive Chairman (June 2026)", source:"https://www.camdenliving.com/", li:"https://www.linkedin.com/company/camden-property-trust", liContacts:[{n:"Kimberly Callahan",t:"Senior Vice President - Investor Relations",u:"https://www.linkedin.com/in/kimberly-callahan-94303849/",w:"Rice-educated senior exec, Houston"},{n:"Connie Chau",t:"Director, Investor Relations",u:"https://www.linkedin.com/in/kconniechau/",w:"Rice MBA, Houston-based"},{n:"Franklin Franco",t:"Recruiter (Camden Recruiting Team, campus career fairs)",u:"https://www.linkedin.com/in/franklin-franco-bbb357180/",w:"Active in university career-fair recruiting"}]},
+  {name:"Midway", hq:"Houston, TX", sector:"Traditional", tier:"A", tx:"East River ($2.5B Buffalo Bayou mixed-use), CityCentre, GreenStreet, Plant Capital Park", asks:["Site visit","Speaker","Recruiting"], rice:"Pure Houston; principals embedded in civic + Houston RE circles", riceLevel:"medium", hook:"East River is arguably Houston's most ambitious adaptive-reuse project of the decade", source:"https://www.midway.team/", li:"https://www.linkedin.com/company/midway", liContacts:[{n:"Anna Deans",t:"Executive Vice President, Investment & Development",u:"https://www.linkedin.com/in/anna-deans-bbbab03/",w:"Leads East River; hosted ULI tours"},{n:"David Hightower",t:"Executive Vice President, Investment & Development",u:"https://www.linkedin.com/in/david-hightower-b68766139/",w:"East River project leadership"},{n:"Robert Williamson",t:"Senior Vice President, Investment Management",u:"https://www.linkedin.com/in/robert-williamson-a6624058/",w:"Houston-based investments SVP"}]},
+  {name:"Greystar", hq:"Charleston, SC (founded Houston 1993)", sector:"Traditional", tier:"A", tx:"Massive TX multifamily ops; active build-to-rent in Houston; large Austin/Dallas/SA portfolios", asks:["Recruiting","Speaker"], rice:"Houston-founded by Bob Faith; original TX ties remain", riceLevel:"medium", hook:"Largest US apartment operator; ~1.1M units globally; ~$79B AUM", source:"https://www.greystar.com/", li:"https://www.linkedin.com/company/greystar", liContacts:[{n:"Nicole DeStefano",t:"Early Careers Recruiter",u:"https://www.linkedin.com/in/nicole-destefano-752190196/",w:"Direct early-careers recruiting contact"},{n:"Trent Conner",t:"Managing Director",u:"https://www.linkedin.com/in/trent-conner-0ab20143/",w:"Houston-based Managing Director"},{n:"Jackie Rhone",t:"Executive Director",u:"https://www.linkedin.com/in/jackie-rhone-15b49a8/",w:"Houston-based executive"}]},
+  {name:"Trammell Crow Company", hq:"Dallas, TX", sector:"Traditional", tier:"A", tx:"Knox Street mixed-use (Dallas), Passport Park West (180-acre DFW industrial), Gulfbelt Logistics (Houston JV)", asks:["Recruiting","Speaker"], rice:"Texas legacy firm — Trammell Crow Sr. dynasty; CBRE subsidiary", riceLevel:"weak", hook:"CBRE-owned dev arm; legacy of one of the most important figures in 20th-c US CRE", source:"https://www.trammellcrow.com/", li:"https://www.linkedin.com/company/trammell-crow-company", liContacts:[{n:"Jeff Holcomb",t:"Managing Director",u:"https://www.linkedin.com/in/jeff-holcomb-21a70142/",w:"Rice University connection on profile"},{n:"Kyle Bateman",t:"Senior Vice President",u:"https://www.linkedin.com/in/kyle-bateman/",w:"Houston office SVP"},{n:"John McMahon",t:"Senior Vice President",u:"https://www.linkedin.com/in/johnvmcmahon/",w:"Houston office SVP"}]},
+  {name:"Hillwood (a Perot Company)", hq:"Dallas, TX", sector:"Traditional", tier:"A", tx:"27,000-acre AllianceTexas (N. Fort Worth) — $143B cumulative regional economic impact; Victory Park, Circle T Ranch", asks:["Speaker","Site visit"], rice:"Perot family — Texas business dynasty; no direct Rice tie", riceLevel:"weak", hook:"Founded 1988 by Ross Perot Jr.; America's largest master-planned industrial development", source:"https://www.hillwood.com/", li:"https://www.linkedin.com/company/hillwood", liContacts:[{n:"Walt Zartman",t:"Executive Vice President - Development, Hillwood Urban",u:"https://www.linkedin.com/in/walt-zartman-03819ab7/",w:"DFW development lead"},{n:"Chris Brown",t:"Executive Vice President - Joint Ventures, Hillwood Investment Properties",u:"https://www.linkedin.com/in/chris-brown-14bb7a6",w:"Senior investments/JV executive"},{n:"Toby Rogers",t:"Executive Vice President",u:"https://www.linkedin.com/in/toby-rogers-0098a81b5/",w:"Senior Hillwood executive, Texas"}]},
+  {name:"Crow Holdings", hq:"Dallas, TX", sector:"Traditional", tier:"A", tx:"$34B AUM; 245MW data-center campus in Central Dallas; Southstone Yards (Frisco); $100M Hilton Anatole renovation", asks:["Site visit","Speaker","Recruiting","Sponsorship"], rice:"Trammell Crow lineage; Dallas civic; supports university CRE programs", riceLevel:"medium", hook:"Texas-native multi-asset platform; new data center, mass-timber, hospitality verticals", source:"https://www.crowholdings.com/", li:"https://www.linkedin.com/company/crow-holdings-l.l.c.", liContacts:[{n:"Jenn Cook, Ed.D.",t:"Talent Acquisition / Full-Cycle Recruiting Lead",u:"https://www.linkedin.com/in/jennlcook/",w:"Runs campus/fall recruiting visits, Dallas"},{n:"Brad Cooper",t:"Managing Director, Crow Holdings Industrial",u:"https://www.linkedin.com/in/brad-cooper-818b59134/",w:"Dallas MD, industrial development"},{n:"Peter Thompson",t:"Director",u:"https://www.linkedin.com/in/peter-thompson-45323010a/",w:"Dallas-based director, approachable level"}]},
+  {name:"Lovett Commercial / Lovett Industrial", hq:"Houston, TX", sector:"Traditional", tier:"A", tx:"POST Houston (16-acre adaptive reuse of Barbara Jordan Post Office); $5B+ in development overall", asks:["Site visit","Speaker","Sponsorship"], rice:"Frank Liu (Rice '78) is founder; Liu Family Foundation gave $16.5M to Rice; founded Liu Idea Lab", riceLevel:"strong", hook:"POST HTX is one of the most celebrated US adaptive-reuse projects of the decade; right next to campus", source:"https://lovettcommercial.com/", contact:"Frank Liu (founder) — via Liu Family Foundation channel", li:"https://www.linkedin.com/company/lovett-industrial", liContacts:[{n:"Frank Liu",t:"President, Lovett",u:"https://www.linkedin.com/in/frank-liu-b33247a/",w:"Founder, Rice '78 alum"},{n:"John Coutinho",t:"Vice President, Lovett Industrial",u:"https://www.linkedin.com/in/johncoutinho/",w:"Houston VP, development platform"},{n:"Logan Gilliland",t:"Vice President - Asset Management, Lovett Industrial",u:"https://www.linkedin.com/in/logan-gilliland-46a2a018/",w:"Houston VP, asset management"}]},
+  {name:"Stream Realty Partners", hq:"Dallas, TX", sector:"Traditional", tier:"B", tx:"$8.9B annual transaction volume; big Houston office; leasing Sinclair Tower (Dallas)", asks:["Recruiting","Speaker"], rice:"Texas-grown brokerage + dev with active Houston office", riceLevel:"weak", hook:"Founded 1996; ~1,550 professionals nationally; Texas-grown culture", source:"https://streamrealty.com/", li:"https://www.linkedin.com/company/stream-realty-partners", liContacts:[{n:"Adam Ross",t:"Vice President, Stream Realty Partners Houston",u:"https://www.linkedin.com/in/adam-ross-2a5150119/",w:"VP in Houston office"},{n:"Tommy Erwin",t:"Vice President of Industrial",u:"https://www.linkedin.com/in/tommy-erwin-09362065/",w:"Houston-based industrial VP"},{n:"JC Clemens Jr.",t:"Investments, Stream Realty Partners",u:"https://www.linkedin.com/in/jc-clemens-jr-494aa246/",w:"Investments-side contact"}]},
+  {name:"Lincoln Property Company", hq:"Dallas, TX", sector:"Traditional", tier:"B", tx:"9M+ sf managed in Dallas; new 34-story Proper Hotel & Residences; South Dallas data center campus", asks:["Recruiting","Speaker"], rice:"Texas-native; one of largest privately held US CRE firms", riceLevel:"weak", hook:"Expanding into data centers; mixed-use; private and willing to engage students", source:"https://lpc.com/", li:"https://www.linkedin.com/company/lincolnpropertycompany", liContacts:[{n:"Gabe Lerner",t:"Executive Vice President, Lincoln Property Company",u:null,w:"Leads The Arc at Ion District with Rice Real Estate"},{n:"Kevin Higgins",t:"Vice President",u:"https://www.linkedin.com/in/kevin-higgins-694730a6/",w:"Houston-based VP"},{n:"Virgil Hydes",t:"Vice President, Leasing",u:"https://www.linkedin.com/in/virgil-hydes-a1177a11/",w:"Houston-based leasing VP"}]},
+  {name:"Crescent Real Estate", hq:"Fort Worth, TX", sector:"Traditional", tier:"B", tx:"GP Invitation Fund IV closed at $241.5M (Dec 2025); Uptown Dallas office buyer", asks:["Speaker","Recruiting"], rice:"Texas firm; no direct Rice tie", riceLevel:"none", hook:"John Goff is a CRE legend; contrarian office buyer", source:"https://crescent.com/", li:"https://www.linkedin.com/company/crescentrealestatellc", liContacts:[{n:"Caleb Bury",t:"Vice President",u:"https://www.linkedin.com/in/caleb-bury/",w:"Acquisitions/underwriting VP, approachable level"},{n:"Jeff Dyer",t:"Senior Vice President, Investments",u:"https://www.linkedin.com/in/jeff-dyer-51517912/",w:"Investments leadership"},{n:"Kevin Crum",t:"Senior Vice President",u:"https://www.linkedin.com/in/kevin-crum-aa63876/",w:"SVP-level Texas contact"}]},
+  {name:"Granite Properties", hq:"Plano, TX", sector:"Traditional", tier:"B", tx:"11.5M sf Class A office; Granite Park (90-acre Plano mixed-use)", asks:["Site visit","Recruiting"], rice:"Texas firm; no direct Rice tie", riceLevel:"none", hook:"Top Plano/Frisco corridor office developer; LEED + Fitwel focus", source:"https://www.graniteprop.com/", li:"https://www.linkedin.com/company/granite-properties", liContacts:[{n:"Andrew Elliott",t:"Leasing Manager",u:"https://www.linkedin.com/in/andrew-elliott-9a671720/",w:"Houston office leasing contact"},{n:"Burson Holman",t:"Director of Leasing",u:"https://www.linkedin.com/in/burson-holman-895b1213/",w:"Director-level Texas leasing"},{n:"John Robbins",t:"Senior Managing Director",u:"https://www.linkedin.com/in/john-robbins-32821713/",w:"Senior leadership contact"}]},
+  {name:"Skanska USA Commercial Dev", hq:"NYC (Houston office)", sector:"Traditional", tier:"B", tx:"1550 on the Green (BIG-Bjarke Ingels designed, 28-story LEED Platinum downtown Houston)", asks:["Site visit","Speaker"], rice:"Houston office; project is walkable from Discovery Green", riceLevel:"weak", hook:"Most sustainable new tower in Houston; anchor tenants Norton Rose, BCG, Hicks Johnson", source:"https://www.usa.skanska.com/", li:"https://www.linkedin.com/company/skanska", liContacts:[{n:"Greg Mondshine",t:"Vice President - Leasing, Skanska",u:"https://www.linkedin.com/in/greg-mondshine-b1a90328/",w:"Houston-based leasing VP"},{n:"Carolyn Desmond",t:"Vice President of Development, Skanska Commercial Development",u:"https://www.linkedin.com/in/carolyn-desmond-2a22ab10/",w:"Development VP at commercial dev arm"},{n:"Jennifer Castrillon",t:"General Counsel and Senior Vice President, Skanska USA Commercial Development",u:"https://www.linkedin.com/in/jennifer-castrillon-8928365/",w:"Senior exec at commercial dev unit"}]},
+  {name:"Transwestern", hq:"Houston, TX", sector:"Traditional", tier:"B", tx:"Houston HQ; full-service brokerage + investment + development family", asks:["Recruiting","Speaker"], rice:"Houston HQ; deep alumni network of Houston CRE pros", riceLevel:"medium", hook:"Founded 1978 by Robert Duncan; one of largest privately-owned diversified CRE firms in US", source:"https://transwestern.com/", li:"https://www.linkedin.com/company/transwestern", liContacts:[{n:"Ed Cummins",t:"Senior Vice President",u:"https://www.linkedin.com/in/ed-cummins-8473b51a/",w:"Houston-based SVP"},{n:"Rachel Glass, CCIM",t:"Vice President",u:"https://www.linkedin.com/in/rachel-glass-ccim-62a38375/",w:"Houston-based VP"},{n:"Mike Ogden, MBA, CPM",t:"Managing Senior Vice President and Principal",u:"https://www.linkedin.com/in/mike-ogden-mba-cpm-0a5b4a14/",w:"Senior Houston services leader"}]},
+  {name:"Endeavor Real Estate Group", hq:"Austin, TX", sector:"Traditional", tier:"B", tx:"The Domain (defining Austin mixed-use), Southpark Meadows, 1890 Ranch, IBC Bank Plaza", asks:["Speaker","Site visit"], rice:"Austin firm; no direct Rice tie", riceLevel:"none", hook:"Most influential Austin developer of the last 20 years; defined modern Austin urban form", source:"https://www.endeavor-re.com/", li:"https://www.linkedin.com/company/endeavor-real-estate-group", liContacts:[{n:"Travis Dunaway",t:"Principal",u:"https://www.linkedin.com/in/travisdunaway/",w:"Austin principal, office leasing/repositioning"},{n:"Evan Deitch",t:"Senior Vice President",u:"https://www.linkedin.com/in/evan-deitch-21163294/",w:"Austin-based SVP"},{n:"Adam Zimel",t:"Principal",u:"https://www.linkedin.com/in/adam-zimel-17344931/",w:"Austin-based principal"}]},
+  {name:"StreetLights Residential", hq:"Dallas, TX", sector:"Traditional", tier:"B", tx:"Luxury multifamily across DFW; new 20-story Park Lane tower (JV Mitsui Fudosan starts Feb 2026)", asks:["Recruiting","Speaker"], rice:"Texas firm; design-led culture", riceLevel:"none", hook:"Design-led, vertically integrated luxury multifamily — unusually strong design culture", source:"https://streetlightsresidential.com/", li:"https://www.linkedin.com/company/streetlights-residential", liContacts:[{n:"Greg Coutant",t:"Senior Vice President of Development",u:"https://www.linkedin.com/in/greg-coutant-a61567a1",w:"Dallas-based development SVP"},{n:"Stephen Meek",t:"Senior Vice President",u:"https://www.linkedin.com/in/stephen-meek-a01601132/",w:"SVP at Dallas HQ firm"},{n:"Rob Bratton",t:"Senior Vice President of Development",u:"https://www.linkedin.com/in/rob-bratton-a62a9014/",w:"Development SVP (Atlanta)"}]},
+  {name:"Cousins Properties", hq:"Atlanta, GA", sector:"Traditional", tier:"B", tx:"Austin office portfolio 1.7M+ sf (Colorado Tower, San Jacinto, One Eleven Congress); $521.8M Sail Tower buy Dec 2024", asks:["Speaker","Recruiting"], rice:"Not Houston-based; Austin investment relevant", riceLevel:"none", hook:"Publicly traded Sun Belt office REIT (NYSE: CUZ); concentrated on Class A in high-growth markets", source:"https://www.cousins.com/", li:"https://www.linkedin.com/company/cousins-properties", liContacts:[{n:"CJ MacQuarrie",t:"Vice President, Development",u:"https://www.linkedin.com/in/cj-macquarrie-86664413/",w:"Texas development VP, 1M+ SF Austin"},{n:"Dan Jones",t:"Senior Vice President & Managing Director",u:"https://www.linkedin.com/in/danielbuchananjones/",w:"Leads Austin market"},{n:"Richard G. Hickson",t:"Senior Vice President & Managing Director",u:"https://www.linkedin.com/in/richard-g-hickson-ba568b4/",w:"Austin-based senior leader"}]},
+  {name:"JPI / Sumitomo Forestry", hq:"Irving, TX", sector:"Traditional", tier:"B", tx:"8,000+ TX/CA homes under construction; NMHC #8 largest US developer", asks:["Recruiting","Speaker"], rice:"Texas-based", riceLevel:"weak", hook:"Acquired by Sumitomo Forestry Dec 2023; Japanese parent balance sheet", source:"https://www.jpi.com/", li:"https://www.linkedin.com/company/jpi-companies", liContacts:[{n:"Miller Sylvan",t:"Senior Vice President & Development",u:"https://www.linkedin.com/in/miller-sylvan-184aba6/",w:"Irving-based development SVP"},{n:"Dallas Meade",t:"Vice President Construction Partner",u:"https://www.linkedin.com/in/dallas-meade-3aaa16111/",w:"Texas construction VP"},{n:"Aaron Douthit, CFA",t:"Vice President",u:null,w:"Texas multifamily development VP, no URL surfaced"}]},
+  {name:"MAA (Mid-America Apartment Communities)", hq:"Germantown, TN", sector:"Traditional", tier:"B", tx:"~102,000 units across 16 Sun Belt states; major TX multifamily owner", asks:["Speaker","Recruiting"], rice:"No direct Rice tie", riceLevel:"none", hook:"S&P 500 REIT; largest publicly traded apartment REIT by unit count", source:"https://www.maac.com/", li:"https://www.linkedin.com/company/mid-america-apartment-communities", liContacts:[{n:"Cliff Koterwas",t:"Mid-America Apartment Communities (title not shown in results)",u:"https://www.linkedin.com/in/cliff-koterwas-544a60a0/",w:"Greater Houston-based MAA employee"},{n:"Brad Hill, CFA",t:"President and Chief Executive Officer",u:"https://www.linkedin.com/in/brad-hill-cfa-a9ba2a16/",w:"Senior; use for org mapping, not outreach"},{n:"Maggy Moore",t:"Talent Acquisition Manager",u:null,w:"Campus/talent recruiting contact, no URL surfaced"}]},
+  {name:"Whitestone REIT", hq:"Houston, TX", sector:"Traditional", tier:"C", tx:"Houston HQ; open-air retail REIT focused on Sun Belt neighborhood centers", asks:["Speaker","Sponsorship"], rice:"Houston HQ — local angle", riceLevel:"medium", hook:"Small-cap public retail REIT (NYSE: WSR); easier access than larger REITs", source:"https://www.whitestonereit.com/"},
+  {name:"Kimco Realty (Weingarten legacy)", hq:"Jericho, NY", sector:"Traditional", tier:"C", tx:"Inherited Weingarten's Houston-centric portfolio via $3.87B 2021 merger", asks:["Speaker","Recruiting"], rice:"Houston ops team holds institutional memory from Weingarten", riceLevel:"weak", hook:"Largest US open-air shopping center REIT; ~559 centers / 100M sf", source:"https://www.kimcorealty.com/"},
+  {name:"Brookfield Properties", hq:"NY / Toronto", sector:"Traditional", tier:"C", tx:"Owns One and Three Allen Center (downtown Houston); $470M CMBS in special servicing April 2026", asks:["Speaker"], rice:"Major Houston downtown landlord — distress story", riceLevel:"weak", hook:"One of world's largest alt asset managers; TX office is a cautionary post-COVID tale", source:"https://www.brookfieldproperties.com/"},
+  {name:"Tishman Speyer", hq:"NY", sector:"Traditional", tier:"C", tx:"Just completed ATX Tower in Austin (58 stories, JV with Ryan Companies, topped out 2025)", asks:["Speaker"], rice:"No Rice tie; relevant for Austin-curious students", riceLevel:"none", hook:"Global developer behind Rockefeller Center; first ground-up Austin development", source:"https://www.tishmanspeyer.com/"},
+  {name:"Silver Ventures / The Pearl", hq:"San Antonio, TX", sector:"Traditional", tier:"C", tx:"22-acre Pearl Brewery mixed-use (SA premier); 265-unit Museum Reach tower planned", asks:["Site visit","Speaker"], rice:"Texas-based; popular with TX college students", riceLevel:"weak", hook:"Family office of Kit Goldsbury (Pace Foods heir); Pearl is one of the most celebrated US brewery-conversion projects", source:"https://atpearl.com/"},
+  {name:"Stonelake Capital Partners", hq:"Austin, TX", sector:"Traditional", tier:"B", tx:"20M sf industrial, 6,100 multifamily, 3M sf office across Sun Belt; $5.5B portfolio", asks:["Recruiting","Speaker"], rice:"Houston office; Texas-native", riceLevel:"weak", hook:"Texas-native PE real estate platform; quietly one of the most successful TX-founded fund managers; $3.1B raised across 9 funds", source:"https://stonelake.com/", li:"https://www.linkedin.com/company/stonelake-capital-partners", liContacts:[{n:"John Bryant",t:"Director",u:"https://www.linkedin.com/in/john-bryant-38175b152/",w:"Director-level, approachable for students"},{n:"Benjamin Harper, CFA",t:"Managing Director",u:"https://www.linkedin.com/in/benjamin-harper-cfa-998b4887/",w:"Dallas-based managing director"},{n:"John Kiltz",t:"Co-Founder, Stonelake Capital Partners",u:"https://www.linkedin.com/in/john-kiltz-155789b",w:"Co-founder, Texas markets"}]},
+  {name:"Pennybacker Capital", hq:"Austin, TX", sector:"Traditional", tier:"C", tx:"Austin-based; ~$4B AUM; Fund VI closed at $1.6B (exceeded target)", asks:["Speaker","Recruiting"], rice:"Austin-based TX firm", riceLevel:"weak", hook:"AI/data-driven CRE allocation; sophisticated institutional LP base", source:"https://pennybackercapital.com/"},
+  {name:"Karlin Real Estate", hq:"Los Angeles, CA", sector:"Traditional", tier:"C", tx:"Verde Square (Q2 Stadium), $610M revamp of 3M Austin campus, 1,100+ Austin multifamily units since 2020", asks:["Speaker"], rice:"No Rice tie; CA firm", riceLevel:"none", hook:"Aggressive TX growth; family-office backed", source:"https://www.karlinrealestate.com/"},
+  {name:"Headington Companies / The Joule", hq:"Dallas, TX", sector:"Hospitality", tier:"B", tx:"The Joule Dallas (164 rooms downtown) + Main St retail/F&B district", asks:["Speaker","Site visit"], rice:"Texas-grown; accessible from Houston", riceLevel:"weak", hook:"Tim Headington (billionaire film producer/oil); catalyzed downtown Dallas re-urbanization", source:"https://headingtoncompanies.com/", li:"https://www.linkedin.com/company/headington-companies", liContacts:[{n:"Greg Katz",t:"Managing Director, Hospitality",u:"https://www.linkedin.com/in/greg-katz-b4802710a/",w:"Dallas-based managing director over hospitality"},{n:"Michael Yee",t:"Legal and Real Estate, Headington Companies LLC",u:"https://www.linkedin.com/in/michaelbhyee/",w:"Dallas real estate function lead"},{n:"Jason Parker",t:"Director, Program Management",u:"https://www.linkedin.com/in/jason-parker-2573b33a/",w:"Director-level, DFW-based since 2010"}]},
+
+  // ===== PROPTECH / CONSTRUCTIONTECH =====
+  {name:"Icon", hq:"Austin, TX", sector:"PropTech", tier:"A", tx:"HQ + Wolf Ranch Georgetown (world's largest 3D-printed neighborhood, 100 homes with Lennar)", asks:["Site visit","Speaker","Recruiting"], rice:"Founder Jason Ballard is media-friendly", riceLevel:"none", hook:"$57M NASA contract; building Mars/lunar habitats with NASA; new 'Titan' robot promises $20/sqft printed walls", source:"https://www.iconbuild.com/", li:"https://www.linkedin.com/company/icon3dtech", liContacts:[{n:"Jason Ballard",t:"Co-Founder & CEO, ICON",u:"https://www.linkedin.com/in/jason-ballard-2932a816/",w:"Founder, Austin-based, media-friendly"},{n:"CJ (Cecilia) Deatherage",t:"Talent Acquisition, ICON (title unconfirmed)",u:"https://www.linkedin.com/in/ceciliadeatherage/",w:"Surfaced in ICON talent-acquisition search; iconbuild content"},{n:"Ryan Mire",t:"ICON (title unconfirmed; posts Austin hiring)",u:"https://www.linkedin.com/in/ryan-mire-7553135/",w:"ICON Austin employee promoting iconbuild.com/careers hiring"}]},
+  {name:"Closinglock", hq:"Austin, TX", sector:"PropTech", tier:"A", tx:"Austin HQ; 73 employees; new downtown office", asks:["Speaker","Recruiting","Sponsorship"], rice:"Texas-based startup; founder Andy White accessible", riceLevel:"weak", hook:"$34M Series B Jan 2025 (Sageview); wire-fraud prevention protecting $500B+ in tx; 25x revenue in 3 years", source:"https://www.closinglock.com/", li:"https://www.linkedin.com/company/closinglock", liContacts:[{n:"Andy White, Ph.D.",t:"Founder and CEO, Closinglock",u:"https://www.linkedin.com/in/andy-closinglock/",w:"Founder, Austin-based, requested by name"},{n:"Dillon Stites",t:"Technical Recruiter, Closinglock",u:"https://www.linkedin.com/in/dstites/",w:"Recruiting staff; posts Closinglock hiring updates"}]},
+  {name:"Billd", hq:"Austin, TX", sector:"PropTech", tier:"A", tx:"Austin HQ; serves subcontractors nationally", asks:["Speaker","Recruiting","Sponsorship"], rice:"Austin-based; well-capitalized", riceLevel:"weak", hook:"$7.3M raise Nov 2025 (MissionOG); 'Predictable Pay' with GCs; construction finance for subs", source:"https://billd.com/", li:"https://www.linkedin.com/company/billdco", liContacts:[{n:"Christopher Doyle",t:"Founder and CEO, Billd",u:"https://www.linkedin.com/in/christopherldoyle/",w:"Rice University alum per LinkedIn; Austin founder"},{n:"Robbie Reynolds",t:"Billd (title unconfirmed)",u:"https://www.linkedin.com/in/reynoldsrobbie/",w:"Billd employee surfaced in leadership search"}]},
+  {name:"Dottid", hq:"Dallas, TX", sector:"PropTech", tier:"A", tx:"Dallas HQ; deep ties to Lincoln Property + Crow Holdings ecosystem", asks:["Speaker","Site visit","Recruiting"], rice:"Founder Kyle Waldrep is a TX PropTech evangelist who loves student events", riceLevel:"medium", hook:"Asset-OS for CRE leasing; Lincoln Property is lead investor; ~$20M raised", source:"https://www.dottid.com/", li:"https://www.linkedin.com/company/dottid", liContacts:[{n:"Kyle Waldrep",t:"Founder & CEO, Dottid (also Intersections Podcast host)",u:"https://www.linkedin.com/in/kyle-waldrep-10b515122/",w:"Founder, Dallas; known to love student events"},{n:"David Waldrep",t:"CAO & General Counsel, Dottid",u:"https://www.linkedin.com/in/david-waldrep-2879409/",w:"C-level executive, Dallas-based"}]},
+  {name:"Procore Technologies", hq:"Carpinteria, CA (Austin tower)", sector:"PropTech", tier:"A", tx:"'Procore Tower' Austin — 8 floors, hundreds of employees (largest office globally)", asks:["Site visit","Speaker","Recruiting"], rice:"Austin tower visit + speaker on construction SaaS", riceLevel:"weak", hook:"Dominant construction-management SaaS (NYSE: PCOR); Austin office handles engineering/sales/CS", source:"https://www.procore.com/", li:"https://www.linkedin.com/company/procore-technologies", liContacts:[{n:"Robert Moore",t:"VP of Business Development, Procore Technologies",u:"https://www.linkedin.com/in/robertwarrenmoore/",w:"VP-level; surfaced in Austin Procore search"},{n:"Jose Ramirez",t:"Procore Technologies (title unconfirmed)",u:"https://www.linkedin.com/in/jose-ramirez-865173121/",w:"Austin, TX-based Procore employee"},{n:"Brendan Nelson",t:"VP of Sales, Procore Technologies",u:"https://www.linkedin.com/in/brendan-nelson/",w:"VP-level sales leader"}]},
+  {name:"Bedrock Robotics", hq:"San Francisco, CA", sector:"PropTech", tier:"A", tx:"130-acre Sundt site + Proto-Town Central Texas; partners with Zachry, Capitol Aggregates, Austin Bridge & Road", asks:["Site visit","Speaker"], rice:"TX deployments via Sundt/Zachry on active sites", riceLevel:"weak", hook:"Ex-Waymo engineers; $270M Series B at $1.75B valuation; autonomy retrofits for excavators", source:"https://bedrock-robotics.com/", li:"https://www.linkedin.com/company/bedrock-robotics", liContacts:[{n:"Boris Sofman",t:"Co-Founder & CEO, Bedrock Robotics",u:"https://www.linkedin.com/in/bsofman",w:"Ex-Waymo founder; TX contractor partnerships"},{n:"John Chu",t:"Head of People, Bedrock Robotics",u:"https://www.linkedin.com/in/johnmchu/",w:"People/recruiting lead; best campus-outreach entry"},{n:"Tom Eliaz",t:"Co-Founder & VP Engineering, Bedrock Robotics",u:"https://www.linkedin.com/in/tomeliaz/",w:"Co-founder; scaled Segment engineering"}]},
+  {name:"CoStar Group", hq:"Arlington, VA", sector:"PropTech", tier:"B", tx:"Offices in Austin, Houston (Post Oak Blvd), Dallas — new Ross Tower Dallas office opening June 2026 (entire 14th floor)", asks:["Speaker","Recruiting"], rice:"Houston + Austin offices accessible", riceLevel:"weak", hook:"Dominant CRE data platform (CoStar, LoopNet, Apartments.com, Homes.com)", source:"https://www.costargroup.com/", li:"https://www.linkedin.com/company/costar-group", liContacts:[{n:"Samantha Sours",t:"Campus Recruiter, CoStar Group",u:"https://www.linkedin.com/in/samantha-sours-690711341/",w:"Dedicated campus recruiting staff"},{n:"Joe Terrell",t:"Vice President of Sales, Southwest Region",u:"https://www.linkedin.com/in/joe-terrell-87877b11/",w:"VP covering Texas/Southwest region"},{n:"Paul Hendershot",t:"Managing Director of Analytics, Southwest",u:"https://www.linkedin.com/in/paul-hendershot-a529234/",w:"Texas-based analytics MD, CRE data expert"}]},
+  {name:"Juniper Square", hq:"San Francisco, CA", sector:"PropTech", tier:"B", tx:"Customer-side: Austin-based Ignite Investments is a marquee client", asks:["Speaker"], rice:"Critical infra for CRE PE — directly relevant to Rice finance students", riceLevel:"weak", hook:"$130M Series D June 2025 at $1.1B post-money; Nasdaq Ventures strategic investment; 2,100+ GPs", source:"https://www.junipersquare.com/", li:"https://www.linkedin.com/company/juniper-square", liContacts:[{n:"Brandon Sedloff",t:"Managing Director, Global Head of Business Development",u:"https://www.linkedin.com/in/bsedloff/",w:"Senior CRE-facing business development leader"},{n:"Kasey Madden",t:"Juniper Square (Austin; exact title not shown in results)",u:"https://www.linkedin.com/in/kaseyothomas/",w:"Austin-based Juniper Square employee"},{n:"William Morrice",t:"Juniper Square Investor Services (Austin)",u:"https://www.linkedin.com/in/william-morrice-9495aa172/",w:"Austin office, investor services team"}]},
+  {name:"VTS", hq:"NY", sector:"PropTech", tier:"B", tx:"Carr Properties uses VTS Market for Austin growth; major TX landlords on platform", asks:["Speaker"], rice:"Virtual speaker easy", riceLevel:"none", hook:"45,000+ CRE users; Blackstone, Hines, Brookfield, BXP on platform; AI leasing tools", source:"https://www.vts.com/", li:"https://www.linkedin.com/company/we-are-vts", liContacts:[{n:"Dana Epsten",t:"VP, Client Support & Enablement",u:"https://www.linkedin.com/in/danaepsten/",w:"VP-level, client-facing and approachable"},{n:"Tori Iosue",t:"Enterprise Account Executive",u:"https://www.linkedin.com/in/victoria-iosue/",w:"Enterprise AE, CRE-owner relationships"},{n:"Jenny Teng",t:"VTS (sales leadership; hiring Principal Account Executive)",u:"https://www.linkedin.com/in/jennytengg/",w:"Active hirer, responsive to outreach"}]},
+  {name:"Opendoor", hq:"Tempe, AZ", sector:"PropTech", tier:"B", tx:"Major DFW, Austin, Houston, SA operations; pioneered iBuying in DFW", asks:["Speaker","Recruiting"], rice:"Active DFW ops", riceLevel:"weak", hook:"New CEO Kaz Nejatian (Sept 2025) pivoting to AI; bought 8,241 homes in 2025; public turnaround story", source:"https://www.opendoor.com/", li:"https://www.linkedin.com/company/opendoor-com", liContacts:[{n:"Paris Pilewicz",t:"Corporate Recruiting Team, Opendoor",u:"https://www.linkedin.com/in/paris-pilewicz-22776160/",w:"Corporate recruiting contact"},{n:"Andy Swanton",t:"Opendoor (exact title not shown in results)",u:"https://www.linkedin.com/in/andy-swanton-49155111/",w:"Opendoor leadership-side contact"},{n:"Chris O'Riordan",t:"Central Region General Manager",u:null,w:"GM over Texas markets incl. Houston"}]},
+  {name:"Compass", hq:"NY", sector:"PropTech", tier:"B", tx:"Top brokerage in Austin, Dallas, Houston markets", asks:["Speaker","Recruiting"], rice:"Texas regional leadership accessible", riceLevel:"weak", hook:"Closed $1.6B Anywhere Real Estate acquisition Jan 2026 — combined ~$10B / 340K agents (Reffkin now leads largest US brokerage)", source:"https://www.compass.com/", li:"https://www.linkedin.com/company/compassinc", liContacts:[{n:"Rachel Conkling",t:"Realtor Associate, Compass (Houston)",u:"https://www.linkedin.com/in/rachel-conkling-455719a6/",w:"Surfaced in Rice University search; Houston top producer"},{n:"Leah Christman",t:"Realtor at Compass Houston",u:"https://www.linkedin.com/in/leah-christman-a371576a/",w:"Houston-based Compass agent"},{n:"Rachel Hocevar",t:"Regional President, Compass (Texas)",u:null,w:"Texas regional leadership; mentioned in Austin event"}]},
+  {name:"Homebound", hq:"San Francisco, CA", sector:"PropTech", tier:"B", tx:"Operates in Austin, Houston, Dallas; Austin entry 2021 was first non-disaster market", asks:["Site visit","Speaker"], rice:"Active Houston/Austin builds", riceLevel:"weak", hook:"Tech-enabled homebuilder; $197M raised (Khosla-backed); wildfire-rebuild stack applied to TX growth markets", source:"https://www.homebound.com/", li:"https://www.linkedin.com/company/homebound-construction", liContacts:[{n:"Nikki Pechet",t:"Co-Founder & CEO",u:"https://www.linkedin.com/in/nikki-pechet-4b949210/",w:"Founder-CEO; builds in Texas markets"},{n:"Lana Trantham",t:"Pre-Construction Project Manager, Homebound",u:"https://www.linkedin.com/in/lana-trantham-147364120/",w:"Operations-side contact, Texas homebuilding"}]},
+  {name:"Versatile", hq:"SF / Tel Aviv", sector:"PropTech", tier:"B", tx:"Enterprise agreement with Austin Commercial; CraneView used on U of Houston Law Center build (53% productivity gain)", asks:["Site visit","Speaker"], rice:"Concrete Houston case study (U of Houston build)", riceLevel:"weak", hook:"Crane-mounted IoT + AI; pioneered the 'smart-crane' category", source:"https://www.versatile.ai/", li:"https://www.linkedin.com/company/versatileai", liContacts:[{n:"Pete Schermerhorn",t:"Former Versatile executive (now Cavendish Advisors LLC)",u:"https://www.linkedin.com/in/pete-schermerhorn-587b4762/",w:"Ex-Versatile leadership, welcomed team hires"},{n:"David Adams",t:"Former Versatile business development (now Business Development @ Genda)",u:"https://www.linkedin.com/in/david-adams-450ab13/",w:"Construction-tech BD, ex-Versatile/CraneView"},{n:"Meirav Oren",t:"Co-founder & Executive Chairwoman",u:null,w:"Founder; no profile URL surfaced in search"}]},
+  {name:"Doorvest", hq:"San Francisco, CA", sector:"PropTech", tier:"B", tx:"Buys homes in Houston + Dallas metros — TX is their largest SFR market", asks:["Speaker","Site visit"], rice:"TX-heavy SFR portfolio", riceLevel:"weak", hook:"AI-powered SFR investing platform; backed by Invitation Homes / Opendoor / Sundae alumni", source:"https://doorvest.com/", li:"https://www.linkedin.com/company/doorvestco", liContacts:[{n:"Andrew Luong",t:"Co-founder / CEO",u:"https://www.linkedin.com/in/andrewqluong/",w:"Founder; Houston is core operating market"},{n:"Bill Waggoner",t:"Doorvest (Houston-based; exact title not shown in results)",u:"https://www.linkedin.com/in/bill-waggoner-896a58144/",w:"Houston-based Doorvest employee"},{n:"Michael Jue",t:"VP of Demand",u:"https://www.linkedin.com/in/michaeltjue/",w:"VP-level growth contact"}]},
+  {name:"Bilt Rewards", hq:"NY", sector:"PropTech", tier:"B", tx:"Available in apartments across all major TX metros via partnered landlords", asks:["Speaker","Sponsorship"], rice:"Ankur Jain is a marquee speaker", riceLevel:"none", hook:"$250M raise July 2025 at $10.75B valuation; 5M+ members; $45B annual rent processed; targeting $1T by 2030", source:"https://www.biltrewards.com/", li:"https://www.linkedin.com/company/biltrewards", liContacts:[{n:"Aaron Weiner",t:"Director, Card & Finance",u:"https://www.linkedin.com/in/aarondweiner/",w:"Director-level Bilt contact"},{n:"David Arroyo",t:"People & Culture, Bilt Rewards",u:"https://www.linkedin.com/in/david-arroyo-aa01963b/",w:"HR/people team, recruiting-adjacent"},{n:"Annie Laurie McCulloh",t:"Executive Director of Leasing & Loyalty",u:null,w:"Real-estate-side executive; mentioned in results"}]},
+  {name:"Hadrian", hq:"Los Angeles, CA", sector:"PropTech", tier:"C", tx:"Dec 2025 MoU with Lockheed Martin (major Grand Prairie TX ops); factories in CA/AZ not TX", asks:["Speaker"], rice:"Chris Power is a popular podcast guest", riceLevel:"none", hook:"$260M Series C July 2025 at $1.6B valuation; automated CNC factories for aerospace/defense", source:"https://www.hadrian.co/"},
+  {name:"Diamond Age", hq:"Phoenix, AZ", sector:"PropTech", tier:"C", tx:"None direct; AZ builds with Century Communities", asks:["Speaker"], rice:"Good Icon-vs-Diamond Age panel opportunity", riceLevel:"none", hook:"$50M Series A; 26-tool robotic gantry cuts construction cycle from 9 months to 30 days", source:"https://www.diamondage3d.com/"},
+  {name:"HqO", hq:"Boston, MA", sector:"PropTech", tier:"C", tx:"No direct office; customer-side only", asks:["Speaker"], rice:"Virtual speaker", riceLevel:"none", hook:"Workplace experience platform; JLL Technologies partner", source:"https://www.hqo.com/"},
+
+  // ===== HOSPITALITY =====
+  {name:"Hyatt — Standard Intl / Bunkhouse", hq:"Chicago (Austin Lifestyle office)", sector:"Hospitality", tier:"A", tx:"Hotel Saint Cecilia, Hotel San José, Austin Motel, Hotel Magdalena, Carpenter Hotel; The Driskill; new 'The Standard, Austin' Spring 2027", asks:["Speaker","Site visit"], rice:"Austin-based Lifestyle office; Liz Lambert legacy accessible", riceLevel:"medium", hook:"$335M Hyatt acquisition closed Oct 2024; Amar Lalvani EVP/President Lifestyle; marquee US lifestyle play right now", source:"https://www.hyatt.com/", contact:"Amar Lalvani or Austin Lifestyle Group", li:"https://www.linkedin.com/company/bunkhouse-group-llc", liContacts:[{n:"Tenaya Hills",t:"Head of Design (SVP, Design & Development), Bunkhouse & JdV",u:"https://www.linkedin.com/in/tenayahills/",w:"Austin-based Bunkhouse design/development leader"},{n:"Amar Lalvani",t:"President & Creative Director, Lifestyle Group, Hyatt",u:null,w:"Known target; no profile URL surfaced in search"},{n:"Bill Gernstein",t:"President, The Marchbanks Company (ex-Bunkhouse Hotel Group)",u:"https://www.linkedin.com/in/bill-gernstein-032a0413/",w:"Austin hospitality veteran with Bunkhouse background"}]},
+  {name:"MML Hospitality (McGuire Moorman Lambert)", hq:"Austin, TX", sector:"Hospitality", tier:"A", tx:"Jeffrey's, Clark's, Sammie's; Sixth & Blanco (Herzog & de Meuron first TX project); F&B at Austin Proper", asks:["Speaker","Site visit","Recruiting"], rice:"Liz Lambert + Larry McGuire — TX hospitality icons", riceLevel:"medium", hook:"Sixth & Blanco is one of the most-watched TX RE developments; Hotel Saint Vincent + Mountain Chalet in pipeline", source:"https://mmlhospitality.com/", li:"https://www.linkedin.com/company/mmlh/", liContacts:[{n:"Kristin Murray-Ralston",t:"Vice President, Project Development, MML Hospitality",u:"https://www.linkedin.com/in/kristindmurray/",w:"VP over development projects, Austin-based"},{n:"Liz Lambert",t:"Founder / Partner, MML Hospitality",u:"https://www.linkedin.com/in/liz-lambert-b737711a8",w:"Co-founder; Texas hospitality icon"},{n:"Richard B. Fell II",t:"MML Hospitality (corporate team; exact title not surfaced)",u:"https://www.linkedin.com/in/richard-b-fell-ii-801768b0/",w:"Austin-based MML corporate team member"}]},
+  {name:"Omni Hotels / TRT Holdings", hq:"Dallas, TX", sector:"Hospitality", tier:"A", tx:"Omni Dallas, Houston, Fort Worth, Austin Downtown, Barton Creek, La Mansión, Mokara SA, PGA Frisco", asks:["Sponsorship","Speaker","Recruiting"], rice:"Robert Rowling (SMU Law); TX HQ", riceLevel:"weak", hook:"51-property chain; ~23,000 employees; TX-HQ'd; TRT bought ~$300M of The Greenbrier's first-lien debt (Apr 2026) — contested in federal court by the Jim Justice family (receivership hearing June 2026); not a clean acquisition", source:"https://www.omnihotels.com/", li:"https://www.linkedin.com/company/omni-hotels", liContacts:[{n:"Alexia Saenz",t:"Senior Recruiter, Omni Hotels & Resorts",u:"https://www.linkedin.com/in/alexiasaenz/",w:"DFW-based recruiter; campus pipeline entry point"},{n:"Charles Coley",t:"Vice President, Rooms, Omni Hotels & Resorts",u:"https://www.linkedin.com/in/charles-coley-37a1b022/",w:"Dallas-based VP in operations"},{n:"Josh Heidenreich",t:"Senior Vice President of Operations, Omni Hotels & Resorts",u:"https://www.linkedin.com/in/josh-heidenreich-b970a99/",w:"SVP Operations; senior Dallas leadership"}]},
+  {name:"Fertitta / Post Oak Hotel", hq:"Houston, TX", sector:"Hospitality", tier:"A", tx:"Post Oak Hotel (only Forbes 5-Star/5-Diamond in Houston); San Luis Galveston; Westin Houston Downtown", asks:["Speaker","Site visit"], rice:"Tilman Fertitta is THE Houston hospitality figure; likely existing Rice ties", riceLevel:"strong", hook:"600+ restaurant/hospitality properties; Houston Rockets owner; marquee Houston speaker", source:"https://www.tilmanfertitta.com/", contact:"Tilman Fertitta or Landry's executive office", li:"https://www.linkedin.com/company/the-post-oak-at-uptown", liContacts:[{n:"Rodney Lerner",t:"Vice President - Real Estate, Landry's Inc.",u:"https://www.linkedin.com/in/rodney-lerner-97b83610/",w:"Houston; most CRE-relevant Landry's executive"},{n:"Paul Schultz",t:"Vice President of Hospitality, Landry's Inc.",u:"https://www.linkedin.com/in/paul-schultz-8780484/",w:"Oversees hospitality division incl. Post Oak"},{n:"Keith Beitler",t:"Executive Vice President / COO, Landry's Inc.",u:"https://www.linkedin.com/in/keith-beitler-02277824/",w:"Senior exec-office contact at Landry's"}]},
+  {name:"Ashford Inc. / Ashford Hospitality Trust / Braemar", hq:"Dallas, TX", sector:"Hospitality", tier:"A", tx:"Marriott DFW North, Sugar Land Marriott, Marriott Plaza SA; sold Hilton Garden Inn Austin Downtown to JMI Realty for $26.85M (June 18, 2026)", asks:["Speaker","Recruiting"], rice:"Sugar Land Marriott in-market; Dallas HQ", riceLevel:"weak", hook:"Ongoing 2025-26 restructuring/asset sales paying down CMBS debt — real-time hotel REIT distress case study; Monty Bennett high-profile Dallas figure; CFO Deric Eubanks retired June 2026 after 23 years", source:"https://www.ahtreit.com/", li:"https://www.linkedin.com/company/ashford-hospitality-trust", liContacts:[{n:"Adam Tegge",t:"Vice President of Acquisitions, Ashford Inc.",u:"https://www.linkedin.com/in/adamtegge/",w:"Guest-lectures at universities; acquisitions VP, Dallas"},{n:"Eric Batis",t:"Chief Operating Officer, Ashford Inc.",u:"https://www.linkedin.com/in/ericbatis/",w:"Post-restructuring operating leadership, Dallas"},{n:"Christopher Nixon",t:"Vice President of Revenue Optimization, Ashford (Dallas)",u:"https://www.linkedin.com/in/nixoncc/",w:"Dallas VP; approachable mid-senior contact"}]},
+  {name:"Hotel ZaZa", hq:"Dallas, TX", sector:"Hospitality", tier:"A", tx:"Hotel ZaZa Dallas, Houston Museum District, Houston Memorial City, Austin downtown — ~641 rooms across 4", asks:["Site visit","Speaker"], rice:"Houston Museum District ZaZa is walking distance from Rice campus", riceLevel:"strong", hook:"TX-grown boutique brand founded 2002 by Charlie Givens; portfolio marketed at ~$300M+", source:"https://www.hotelzaza.com/", li:"https://www.linkedin.com/company/hotel-zaza", liContacts:[{n:"Patrick Fisher",t:"President, Hotel ZaZa",u:"https://www.linkedin.com/in/patrick-fisher-91016331/",w:"Top corporate leader of boutique brand"},{n:"Alex Aland",t:"General Manager, Hotel ZaZa",u:"https://www.linkedin.com/in/alex-aland-2b87a127/",w:"Property GM; direct operations contact"},{n:"Matthew Nuss",t:"ZaZa Hospitality / Hotel ZaZa (exact title not surfaced)",u:"https://www.linkedin.com/in/matthew-nuss-85216a54/",w:"Corporate ZaZa Hospitality team member"}]},
+  {name:"The Houstonian Hotel, Club & Spa", hq:"Houston, TX", sector:"Hospitality", tier:"A", tx:"18-acre campus on Post Oak Lane — hotel + private club + spa + conference center", asks:["Site visit","Speaker","Sponsorship"], rice:"Across town from Rice; Houstonian Club has substantial Rice alumni overlap", riceLevel:"strong", hook:"Independent luxury campus; George H.W. Bush's TX voting residence in the 1980s; one of Houston's most established hospitality assets", source:"https://www.houstonian.com/", li:"https://www.linkedin.com/company/the-houstonian-hotel-club-&-spa", liContacts:[{n:"Steve Fronterhouse",t:"President, Hotel Division, The Houstonian Hotel, Club & Spa",u:"https://www.linkedin.com/in/steve-fronterhouse-64a6541/",w:"Longtime GM, now Hotel Division president"},{n:"Cher Harris",t:"President of The Club Division, The Houstonian Hotel, Club & Spa",u:"https://www.linkedin.com/in/cher-harris-698924b/",w:"Club division head; Rice-alumni member overlap"},{n:"Kelley Bettis",t:"Assistant General Manager, The Houstonian Hotel, Club & Spa",u:"https://www.linkedin.com/in/kelley-bettis-2b213019/",w:"Approachable operations leadership contact"}]},
+  {name:"Auberge — Commodore Perry Estate", hq:"Mill Valley, CA (Austin property)", sector:"Hospitality", tier:"B", tx:"Commodore Perry Estate (54-key luxury, 10 acres, Hancock); Two Michelin Keys 2024", asks:["Site visit","Speaker"], rice:"Houston UHNW travel client base", riceLevel:"weak", hook:"Top-tier independent luxury operator; growing TX footprint", source:"https://aubergeresorts.com/", li:"https://www.linkedin.com/company/commodoreperry", liContacts:[{n:"Jennifer Gaines",t:"Hospitality role at Commodore Perry Estate (exact title not shown in search)",u:"https://www.linkedin.com/in/jennifer-gaines-803a2141/",w:"Austin-based, on-property staff member"},{n:"BreAnn Brown",t:"Team member, Commodore Perry Estate (exact title not shown in search)",u:"https://www.linkedin.com/in/breann-brown/",w:"Active on-property team member, Austin"},{n:"Nick Cedergren",t:"Hospitality leader, Commodore Perry Estate (Leader of the Quarter)",u:"https://www.linkedin.com/in/nick-cedergren-70a415106/",w:"Recognized property leader, approachable"}]},
+  {name:"Highgate Hotels", hq:"NY (Irving office)", sector:"Hospitality", tier:"B", tx:"Manages The Joule (Dallas), Le Méridien Stoneleigh, upcoming Hotel Swexan, Austin Proper Hotel", asks:["Recruiting","Site visit"], rice:"Irving corporate office", riceLevel:"weak", hook:"79,000+ rooms globally; aggressive 2024–25 push into TX luxury lifestyle", source:"https://www.highgate.com/", li:"https://www.linkedin.com/company/highgate", liContacts:[{n:"Bill Couglin",t:"Vice President of Operations, Highgate Hotels",u:"https://www.linkedin.com/in/bill-couglin-29476421/",w:"VP based in Irving TX headquarters"},{n:"Ed Adams",t:"Vice President Finance, Highgate",u:"https://www.linkedin.com/in/ed-adams-25b38515/",w:"Texas-based (Austin) VP-level contact"},{n:"Natali Solomon",t:"Regional Recruiter, Highgate",u:"https://www.linkedin.com/in/natalisolomon/",w:"Recruiting staff, campus-pipeline entry point"}]},
+  {name:"Loews Hotels", hq:"NY", sector:"Hospitality", tier:"B", tx:"Live! by Loews Arlington (300 rooms between Globe Life Field + AT&T Stadium); Loews Arlington Hotel (888 rooms)", asks:["Site visit","Speaker"], rice:"Sports/entertainment + RE overlap angle is compelling", riceLevel:"none", hook:"Major experiential sports-hospitality bet in DFW Entertainment District; JV with Cordish", source:"https://www.loewshotels.com/", li:"https://www.linkedin.com/company/loewshotels", liContacts:[{n:"Michael Robertson",t:"Area Director of Group Sales, Live! by Loews & Loews Arlington Hotel and Convention Center",u:"https://www.linkedin.com/in/michael-r-robertson/",w:"Texas property director, outward-facing sales role"},{n:"Jason Crace",t:"Area Director of Sales, Loews Arlington",u:"https://www.linkedin.com/in/jasoncrace/",w:"Director at Texas flagship property"},{n:"Mark Story",t:"Sr. Meeting & Events Manager, Loews Arlington",u:"https://www.linkedin.com/in/markastory/",w:"Arlington TX events contact, approachable level"}]},
+  {name:"Ryman Hospitality Properties", hq:"Nashville, TN", sector:"Hospitality", tier:"B", tx:"Gaylord Texan Grapevine (1,814 rooms, 486K sf meeting); $800M JW Marriott SA Hill Country buy (2024)", asks:["Speaker","Site visit"], rice:"JW SA in TX day-trip radius", riceLevel:"none", hook:"REIT capital allocation case; one of largest group/convention asset platforms in US", source:"https://www.rymanhp.com/", li:"https://www.linkedin.com/company/ryman-hospitality-properties", liContacts:[{n:"Chuck Pacioni",t:"General Manager, Gaylord Texan Resort & Convention Center",u:"https://www.linkedin.com/in/chuck-pacioni-b06453a/",w:"Top leader at Texas flagship asset"},{n:"Cameron McDonald",t:"Gaylord Texan Resort and Convention Center (exact title not shown in search)",u:"https://www.linkedin.com/in/cameron-mcdonald-582bb11a/",w:"Texas on-property staff member"},{n:"Thomas Egan",t:"Director of Sales and Marketing, Gaylord Texan",u:null,w:"Texas director, outward-facing sales role"}]},
+  {name:"New Waterloo", hq:"Austin, TX", sector:"Hospitality", tier:"B", tx:"Hotel Ella; former South Congress Hotel (sold to Hyatt); Albert Hotel Fredericksburg", asks:["Speaker","Site visit"], rice:"TX-grown firm whose flagship just exited to a strategic", riceLevel:"weak", hook:"Building case in small-market lifestyle hotel investing post-Hyatt exit", source:"https://newwaterloo.com/", li:"https://www.linkedin.com/company/newwaterloo", liContacts:[{n:"David Lang",t:"Vice President of Operations, New Waterloo",u:"https://www.linkedin.com/in/dlangsoma/",w:"Austin-based VP over hotel operations"},{n:"Mary Grace Mooney",t:"Corporate Director of Hotel Sales / Chief of Staff, New Waterloo",u:"https://www.linkedin.com/in/mary-grace-mooney-63aaa841/",w:"Corporate director, outward-facing role"},{n:"Mindi Marshall",t:"New Waterloo (exact title not shown in search)",u:"https://www.linkedin.com/in/mindi-marshall-4b009323/",w:"Austin-based corporate staff member"}]},
+  {name:"Ohana RE / Signia La Cantera", hq:"Redwood City, CA", sector:"Hospitality", tier:"C", tx:"Signia by Hilton La Cantera Resort & Spa SA (rebranded Oct 2025 from Destination)", asks:["Site visit","Speaker"], rice:"TX day-trip site visit option", riceLevel:"none", hook:"Recent rebrand/repositioning case; peer trade to JW Marriott Hill Country", source:"https://www.ohanaadvisors.com/"},
+
+  // ===== INDUSTRIAL / DATA CENTERS / STARBASE =====
+  {name:"SpaceX Facilities & Construction", hq:"Hawthorne, CA / Starbase, TX", sector:"Industrial", tier:"A", tx:"Starbase TX (newly incorporated city); $100M+ Office Mezzanine; Rio West retail, $20M school, clinic, worker housing", asks:["Recruiting","Speaker"], rice:"In-house construction PM hiring pipeline — Rice MCM/engineering grads fit", riceLevel:"weak", hook:"Self-performs Starbase build; Starbase officially incorporated as TX city May 2025", source:"https://www.spacex.com/", li:"https://www.linkedin.com/company/spacex", liContacts:[{n:"Daniel Walton",t:"Construction Manager, SpaceX",u:"https://www.linkedin.com/in/daniel-walton-0bb5684b/",w:"Posts about Starbase construction work"},{n:"David Keller, PE, PMP",t:"Facilities Manager, SpaceX",u:"https://www.linkedin.com/in/davidkeller-pe/",w:"Led site multidisciplinary facilities engineering team"},{n:"Nate Boyd, PE",t:"Construction/facilities (exact title not confirmed)",u:"https://www.linkedin.com/in/nate-boyd-pe-52b6a821/",w:"Hiring for Starbase construction contractor roles"}]},
+  {name:"The Boring Company", hq:"Bastrop, TX", sector:"Industrial", tier:"A", tx:"Bastrop HQ — 80K sf warehouse, bodega, housing complex; pedestrian tunnel to SpaceX manufacturing", asks:["Speaker","Recruiting"], rice:"Self-builds with in-house construction team", riceLevel:"weak", hook:"Boring is its own GC — they tunnel/build for themselves; Oct 2025 proposed Bastrop city tunnels", source:"https://www.boringcompany.com/", li:"https://www.linkedin.com/company/tbc-theboringcompany", liContacts:[{n:"Mike Baier",t:"Director, Electrical and Software Engineering",u:"https://www.linkedin.com/in/mike-baier-97ba92a/",w:"Bastrop-based director overseeing TBM production"},{n:"Lisa Surnow",t:"Director of Corporate Operations",u:"https://www.linkedin.com/in/lisa-surnow-b2050461/",w:"Austin-based operations director; likely handles outreach"},{n:"Garrison Ragsdale",t:"Civil Engineer",u:"https://www.linkedin.com/in/garrison-ragsdale-64088ab2/",w:"Civil engineer at Bastrop HQ; approachable peer contact"}]},
+  {name:"Tesla Construction (Giga TX)", hq:"Austin, TX", sector:"Industrial", tier:"A", tx:"Giga Texas Austin (2,500-acre ongoing buildout, Cybertruck line, Robstown Lithium Refinery)", asks:["Recruiting"], rice:"In-house construction PM hiring", riceLevel:"weak", hook:"Tesla self-manages much of ongoing Giga TX expansion", source:"https://www.tesla.com/", li:"https://www.linkedin.com/company/tesla-motors", liContacts:[{n:"Meghan Darcy",t:"Sr Construction Project Manager, Tesla",u:"https://www.linkedin.com/in/meghan-darcy-63351b284/",w:"Austin-based senior construction PM at Giga Texas"},{n:"Leonel Som",t:"Construction Manager, Tesla",u:"https://www.linkedin.com/in/leonel-som-48070523/",w:"Austin-based construction manager"},{n:"Kelly Crain",t:"Senior Technical Construction Superintendent, Tesla",u:"https://www.linkedin.com/in/kelly-crain-30719410/",w:"Senior construction superintendent at Giga Texas"}]},
+  {name:"Crusoe", hq:"Denver, CO (TX mega-site)", sector:"Industrial", tier:"A+", tx:"OpenAI/Oracle Stargate flagship Abilene TX — 8 buildings / 4M sf / 1.2 GW; Phase 1 live Sept 2025", asks:["Speaker","Sponsorship"], rice:"The marquee AI infra speaker of the decade", riceLevel:"weak", hook:"$15B in debt/equity raised; Stargate is the single most important AI infrastructure project in the US", source:"https://www.crusoe.ai/", li:"https://www.linkedin.com/company/crusoe", liContacts:[{n:"Chris Dolan",t:"Chief Data Center Officer",u:"https://www.linkedin.com/in/chris-dolan-84973/",w:"Leads data center development incl. Abilene Stargate build"},{n:"Cully Cavness",t:"Co-Founder & President",u:"https://www.linkedin.com/in/ccavness",w:"Posts publicly about Abilene project economic impact"},{n:"Caleb Crosby",t:"Operations leader (exact title not confirmed)",u:"https://www.linkedin.com/in/caleb-crosby-8a57b3133/",w:"Operations leader posting on Abilene campus construction"}]},
+  {name:"Lancium", hq:"Houston, TX", sector:"Industrial", tier:"A+", tx:"Owns Clean Campus land in Abilene that Crusoe is building Stargate on", asks:["Speaker","Recruiting","Sponsorship"], rice:"Houston HQ — strongest Rice angle in the entire AI data center stack", riceLevel:"strong", hook:"Houston HQ + owns the land under the most important AI project in the US", source:"https://lancium.com/", li:"https://www.linkedin.com/company/lancium", liContacts:[{n:"Jason Marshall, PMP",t:"VP, Project Management & Engineering",u:"https://www.linkedin.com/in/marsjl/",w:"Houston-based VP; posts about Abilene Clean Campus"},{n:"Ted Postula",t:"Director, Finance and Strategy",u:"https://www.linkedin.com/in/tedpostula/",w:"Houston-based director at small Houston HQ firm"}]},
+  {name:"Polk Mechanical Company", hq:"Houston, TX", sector:"Industrial", tier:"A", tx:"Houston HQ; confirmed Tesla Gigafactory TX mechanical subcontractor (mechanic's lien 2021)", asks:["Site visit","Recruiting"], rice:"Houston HQ — direct", riceLevel:"medium", hook:"Tier-1 mechanical on Giga TX; likely active in Bastrop SpaceX/Boring buildouts", source:"https://www.polkmechanical.com/", li:"https://www.linkedin.com/company/polk-mechanical", liContacts:[{n:"Christopher Luberoff",t:"Vice President of Houston Construction",u:"https://www.linkedin.com/in/christopher-luberoff-83a33335/",w:"Runs Houston construction; ideal local leadership contact"},{n:"Mark Sledge",t:"Executive Vice President",u:"https://www.linkedin.com/in/marksledge/",w:"Senior executive at Houston mechanical contractor"},{n:"Brad Rogers",t:"Vice President - Preconstruction",u:"https://www.linkedin.com/in/brad-rogers-2827646/",w:"Preconstruction VP; relevant to student pipeline topics"}]},
+  {name:"W&W Erectors", hq:"Texas (steel erector)", sector:"Industrial", tier:"B", tx:"Confirmed Starbase launchpad steel erector (per Cameron County litigation)", asks:["Site visit"], rice:"Specialty trade panel candidate", riceLevel:"none", hook:"Likely erecting second OLM tower and Giga-Bay structural steel at Starbase", source:"", li:"https://www.linkedin.com/company/w&w-steel-erectors-llc", liContacts:[{n:"Cory Hadden-Leggett",t:"W&W Steel Erectors (Texas Rangers stadium rigging work)",u:"https://www.linkedin.com/in/cory-hadden-leggett-7075bb67/",w:"Texas stadium project experience at firm"},{n:"Chris Edwards",t:"Superintendent, W&W Steel Erectors",u:"https://www.linkedin.com/in/draggingiron/",w:"Field operations leadership"},{n:"Asbiel Samaniego",t:"Architectural Project Manager, W&W|AFCO Steel",u:"https://www.linkedin.com/in/asbiel-samaniego-951298127/",w:"PM at affiliated fabricator W&W|AFCO"}]},
+  {name:"Dürr Industries", hq:"Plymouth, MI", sector:"Industrial", tier:"B", tx:"Confirmed prime contractor on Tesla Gigafactory TX (paint shops, final-assembly automation)", asks:["Recruiting"], rice:"Industrial PM/engineering pipeline", riceLevel:"none", hook:"Specializes in paint shops, final-assembly automation; tier-1 Giga TX prime", source:"https://www.durr-group.com/", li:"https://www.linkedin.com/company/durr-industries-inc", liContacts:[{n:"Mike Boss",t:"President & CEO, Durr Systems Inc (Dürr North America)",u:"https://www.linkedin.com/in/mike-boss-a65b6a17/",w:"Top Dürr North America executive; sister entity"}]},
+  {name:"Prologis", hq:"San Francisco, CA", sector:"Industrial", tier:"A", tx:"Largest industrial owner in Houston (238 properties / 38M sf); 300+ DFW warehouses / 60M sf; active Legacy Point Cypress builds", asks:["Speaker","Sponsorship","Recruiting"], rice:"Houston market head accessible", riceLevel:"weak", hook:"Largest US industrial REIT; deepest TX industrial footprint of any institutional owner", source:"https://www.prologis.com/", li:"https://www.linkedin.com/company/prologis", liContacts:[{n:"Jeff Foster",t:"Vice President - Market Officer",u:"https://www.linkedin.com/in/jeff-foster-8779936/",w:"Market officer surfacing in Houston-market searches"},{n:"Adam Bray",t:"Vice President, Investment Officer (Capital Deployment)",u:"https://www.linkedin.com/in/adam-bray/",w:"Houston-linked VP on capital deployment/investments"},{n:"Hans Brindley",t:"SVP, Market Officer - Houston",u:null,w:"Named as Prologis Houston market lead; no URL surfaced"}]},
+  {name:"EastGroup Properties", hq:"Jackson, MS", sector:"Industrial", tier:"B", tx:"65.1M sf concentrated in Houston + Dallas Sunbelt; 20K-100K sf multi-tenant shallow-bay", asks:["Recruiting","Speaker"], rice:"Best-in-class Sunbelt industrial REIT", riceLevel:"none", hook:"Pure-play TX/FL/AZ Sun Belt industrial; active Dallas groundbreakings", source:"https://www.eastgroup.net/", li:"https://www.linkedin.com/company/eastgroup-properties-inc", liContacts:[{n:"John Ratliff",t:"Senior Vice President",u:"https://www.linkedin.com/in/john-ratliff-50990b6/",w:"SVP; profile ties to Texas/Central region ops"},{n:"Kevin Sager",t:"Senior Vice President",u:"https://www.linkedin.com/in/kevin-sager-1478aa20",w:"SVP at EastGroup Properties"},{n:"Jordan Barber",t:"EastGroup Properties (title not shown in results; DFW-based)",u:"https://www.linkedin.com/in/jordan-barber-b3b38763/",w:"Dallas-Fort Worth area EastGroup employee"}]},
+  {name:"STAG Industrial", hq:"Boston, MA", sector:"Industrial", tier:"B", tx:"13 Houston properties / 2.3M sf (mostly Class A, 68K-289K sf single-tenant)", asks:["Recruiting","Speaker"], rice:"Houston-active REIT", riceLevel:"weak", hook:"Single-tenant industrial REIT focus", source:"https://www.stagindustrial.com/", li:"https://www.linkedin.com/company/stagindustrial-inc", liContacts:[{n:"Steve Xiarhos",t:"Vice President, Capital Markets & Investor Relations",u:"https://www.linkedin.com/in/steve-xiarhos-27a15b63/",w:"VP capital markets/IR, outward-facing role"},{n:"Ryan Murphy, CFA, CRE",t:"STAG Industrial (senior investments; exact title not shown in results)",u:"https://www.linkedin.com/in/ryan-murphy-cfa/",w:"CFA/CRE credentialed STAG investments contact"},{n:"Scott Roache",t:"Vice President IT",u:"https://www.linkedin.com/in/scottroache/",w:"VP-level STAG contact"}]},
+  {name:"Digital Realty", hq:"Austin, TX", sector:"Industrial", tier:"A", tx:"Global HQ Austin (moved from SF 2021); 30+ TX data centers / 4M+ sf / 100+ MW; 1502 Ferris Rd Garland $120M build", asks:["Speaker","Sponsorship"], rice:"TX-HQ data center REIT — easiest to engage", riceLevel:"weak", hook:"Global HQ in Austin since 2021; ~20% of NA workforce in TX", source:"https://www.digitalrealty.com/", li:"https://www.linkedin.com/company/digitalrealty", liContacts:[{n:"Daniel Kingman",t:"Senior Vice President, Global Design, Engineering & Construction",u:"https://www.linkedin.com/in/daniel-kingman-64600696/",w:"Austin-based SVP over design, engineering, construction"},{n:"Steve Kundich",t:"SVP, Global Design & Innovation (Development Planning, Chief Architect)",u:"https://www.linkedin.com/in/steve-kundich-a3086612/",w:"Texas-based senior development planning leader"},{n:"Cindy Fiedelman",t:"Chief Human Resources Officer",u:"https://www.linkedin.com/in/cindy-fiedelman-19ba87/",w:"Dallas-based CHRO; gateway to university recruiting"}]},
+  {name:"QTS Realty Trust (Blackstone)", hq:"Overland Park, KS", sector:"Industrial", tier:"A", tx:"$780M of new TX permits 2025: Wilmer $300M / 470K sf, Fort Worth Park Vista $130M, Irving Microsoft 7-DC JV", asks:["Sponsorship","Speaker"], rice:"Blackstone-owned (sponsorship channel)", riceLevel:"none", hook:"$3.46B CMBS — largest data center refinancing in history; Blackstone's data center bet", source:"https://www.qtsdatacenters.com/", li:"https://www.linkedin.com/company/qtsdatacenters", liContacts:[{n:"Matt Bryan",t:"VP of Development, QTS Data Centers",u:"https://www.linkedin.com/in/matt-bryan-757aaa70/",w:"Team building new QTS data center campus in Texas"},{n:"Shane Campbell",t:"Director, Development Q-Systems",u:"https://www.linkedin.com/in/shane-campbell-a4875528/",w:"Development director on QTS build programs"},{n:"Adam Rutt",t:"Senior Development Project Manager",u:"https://www.linkedin.com/in/adam-rutt-ab353b88/",w:"Hands-on development PM; approachable contact"}]},
+  {name:"Stream Data Centers", hq:"Dallas, TX", sector:"Industrial", tier:"A", tx:"140-acre Wilmer hyperscale campus (1.4M sf / 240 MW, future 372 MW); Apollo majority stake Aug 2025", asks:["Site visit","Speaker","Recruiting"], rice:"TX-HQ data center developer", riceLevel:"weak", hook:"Apollo-backed; new CEO Michael Lahoud (Jan 2026); DFW data center vacancy at 2.4% with 350 MW under construction (90% pre-leased)", source:"https://www.streamdatacenters.com/", li:"https://www.linkedin.com/company/stream-data-centers", liContacts:[{n:"Michael Lahoud",t:"CEO (per notes; LinkedIn snippet may lag)",u:"https://www.linkedin.com/in/michael-lahoud-58bb357/",w:"CEO since Jan 2026, Dallas-Fort Worth based"},{n:"Scott Greubel",t:"EVP, Construction",u:"https://www.linkedin.com/in/scott-greubel-0a0b056/",w:"Top construction executive, hyperscale delivery"},{n:"Jacob Tesney, MBA, SHRM-CP",t:"HR / talent leader (exact title unverified)",u:"https://www.linkedin.com/in/jacob-tesney/",w:"HR-certified staffer, recruiting-adjacent entry point"}]},
+  {name:"Compass Datacenters", hq:"Dallas, TX", sector:"Industrial", tier:"A", tx:"Red Oak campus expanding by 2 buildings / 500K+ sf / $200M (DFW III-II); 375 additional acres", asks:["Site visit","Speaker"], rice:"TX-HQ; site visit-friendly", riceLevel:"weak", hook:"Privately held; aggressive Red Oak / DFW expansion", source:"https://www.compassdatacenters.com/", li:"https://www.linkedin.com/company/compass-datacenters", liContacts:[{n:"Tim McGinty",t:"Senior Vice President",u:"https://www.linkedin.com/in/tim-mcginty/",w:"SVP based in Dallas-Fort Worth Metroplex"},{n:"Nancy Novak",t:"Chief Innovation Officer",u:"https://www.linkedin.com/in/nancy-novak-a6b9316/",w:"Senior construction/innovation leader, active industry speaker"},{n:"Candace Peterson",t:"Senior Vice President, Marketing",u:"https://www.linkedin.com/in/candace-candy-peterson/",w:"Dallas-based SVP, external-facing role"}]},
+  {name:"DataBank", hq:"Dallas, TX", sector:"Industrial", tier:"A", tx:"292-acre, 8-building Red Oak campus (480 MW at full build); financing now ~$2.65B after June 2026 $1.45B raise — supports 4th building (+60 MW)", asks:["Speaker","Recruiting"], rice:"Dallas HQ; major DC pipeline", riceLevel:"weak", hook:"Privately held; closed $1.45B in new financing June 15, 2026 (incl. first-ever private placement) to expand Red Oak", source:"https://www.databank.com/", li:"https://www.linkedin.com/company/databank", liContacts:[{n:"Brett Versher",t:"Regional Director of Data Center Operations - Texas",u:"https://www.linkedin.com/in/brett-versher-1a72513/",w:"Runs Texas data center operations, DFW based"},{n:"Dennis Wilson",t:"Senior Vice President of Account Management and Carrier Sales",u:"https://www.linkedin.com/in/dennis-wilson-723633a/",w:"Dallas-based SVP, senior relationship role"}]},
+  {name:"Aligned Data Centers", hq:"Plano, TX", sector:"Industrial", tier:"B", tx:"Plano HQ; major builder of liquid-cooled hyperscale facilities across TX, AZ", asks:["Recruiting","Site visit"], rice:"TX-HQ", riceLevel:"weak", hook:"Liquid-cooled hyperscale specialist", source:"https://www.aligneddc.com/", li:"https://www.linkedin.com/company/aligneddc", liContacts:[{n:"Jake Berry",t:"Senior Talent Acquisition Specialist",u:"https://www.linkedin.com/in/jakethesnake/",w:"Recruiting staff; DFW (Mansfield) facility involvement"},{n:"Amy West",t:"Talent Acquisition Manager",u:"https://www.linkedin.com/in/amy-west-adc/",w:"Talent acquisition manager at Plano-based firm"},{n:"Andrew Schaap",t:"CEO & Board Member",u:"https://www.linkedin.com/in/andrewschaap1",w:"Top executive, Dallas-based data center leader"}]},
+  {name:"Vantage Data Centers", hq:"Denver, CO", sector:"Industrial", tier:"A", tx:"$25B Frontier Campus, Shackelford County TX — 1,200 acres / 1.4 GW (one of largest hyperscale globally)", asks:["Speaker","Sponsorship"], rice:"Second mega AI campus in TX after Stargate", riceLevel:"none", hook:"$25B Frontier Campus is Vantage's largest project ever; construction late 2025-2029", source:"https://www.vantage-dc.com/", li:"https://www.linkedin.com/company/vantage-data-centers", liContacts:[{n:"Dana Adams",t:"President, North America",u:"https://www.linkedin.com/in/dana-adams-dcs/",w:"Oversees North America including Frontier TX campus"},{n:"Ian McGaw",t:"Vice President, Strategic Construction Initiatives, North America",u:"https://www.linkedin.com/in/ianmmcgaw/",w:"Construction initiatives VP for North America builds"},{n:"Teresa Tsung",t:"Vice President of Project Controls",u:"https://www.linkedin.com/in/teresatsung/",w:"Project controls VP, posted about Frontier TX"}]},
+  {name:"CyrusOne (KKR / GIP)", hq:"Dallas, TX", sector:"Industrial", tier:"B", tx:"New 190 MW Bosque County TX hyperscale with Calpine, online Q4 2026", asks:["Sponsorship","Speaker"], rice:"KKR-owned; Dallas HQ", riceLevel:"weak", hook:"KKR/GIP-owned post-2022; major TX expansion", source:"https://cyrusone.com/", li:"https://www.linkedin.com/company/cyrusone", liContacts:[{n:"Pierre Revol, CCIM",t:"Senior Vice President, Capital Markets",u:"https://www.linkedin.com/in/pierre-revol/",w:"SVP capital markets, Dallas HQ, CRE-relevant"},{n:"Erik Leban",t:"Vice President, Tax",u:"https://www.linkedin.com/in/erik-leban-3331ba11/",w:"Dallas-based VP at CyrusOne"},{n:"Danny Cowser",t:"SVP Construction",u:"https://www.linkedin.com/in/danny-cowser-8baaa31/",w:"SVP construction, development-side contact"}]},
+  {name:"Holder Construction", hq:"Atlanta, GA", sector:"Industrial", tier:"A", tx:"Largest hyperscale data center GC in North America (~$3-4B annual DC revenue); active across TX hyperscale builds", asks:["Speaker","Recruiting"], rice:"Huge data center practice", riceLevel:"none", hook:"#1 hyperscale GC in NA; absolutely dominant in data center construction", source:"https://www.holderconstruction.com/", li:"https://www.linkedin.com/company/holder-construction", liContacts:[{n:"ElizabethWood Miller",t:"Manager (Recruiting/Onboarding)",u:"https://www.linkedin.com/in/elizabethwood-miller-a4077aa/",w:"Handles recruiting and onboarding of key talent"},{n:"Rick Morgan",t:"Executive Vice President",u:"https://www.linkedin.com/in/rick-morgan-922035a/",w:"EVP at #1 hyperscale general contractor"},{n:"Jason Bell",t:"Senior Vice President",u:"https://www.linkedin.com/in/jason-bell-50120043/",w:"SVP in Ashburn, data center market hub"}]},
+  {name:"Turner Construction", hq:"NY (Houston office)", sector:"Industrial", tier:"A", tx:"Houston office; doubled data center revenue in 2025; $29.2B record total revenue", asks:["Speaker","Recruiting"], rice:"Houston office accessible", riceLevel:"weak", hook:"Doubled DC revenue in 2025; $29.2B record total; active TX DC pipeline", source:"https://www.turnerconstruction.com/", li:"https://www.linkedin.com/company/turner-construction-company", liContacts:[{n:"Andy Tandon",t:"Vice President & General Manager, Houston",u:null,w:"Houston office GM, involved with Rice Design Alliance"},{n:"Graham Dewar, PE",t:"Vice President & General Manager (Austin)",u:"https://www.linkedin.com/in/graham-dewar-pe-24b985b/",w:"Texas business unit leader, Austin office"},{n:"John de Ruiter",t:"Vice President, Operations Manager",u:"https://www.linkedin.com/in/john-de-ruiter-5206261a/",w:"VP operations with Houston market ties"}]},
+  {name:"Whiting-Turner Contracting", hq:"Baltimore, MD", sector:"Industrial", tier:"B", tx:"Top-10 data center GC; growing TX presence", asks:["Recruiting"], rice:"Recruiting", riceLevel:"none", hook:"Top-tier DC GC", source:"https://www.whiting-turner.com/", li:"https://www.linkedin.com/company/the-whiting-turner-contracting-company", liContacts:[{n:"Michael Kersey",t:"Senior Vice President",u:"https://www.linkedin.com/in/michael-kersey-93214115/",w:"SVP based in Dallas-Fort Worth"},{n:"Espen Brooks",t:"Division Vice President",u:"https://www.linkedin.com/in/espen-brooks-539688122/",w:"Division VP based in Plano, TX"}]},
+  {name:"Linbeck Group", hq:"Houston, TX", sector:"Industrial", tier:"A", tx:"Houston HQ; major TMC contractor; 2025 ENR award nominees include Cook Children's, ACU, Southwestern", asks:["Sponsorship","Speaker","Recruiting"], rice:"Houston HQ — top Houston relationship to cultivate", riceLevel:"strong", hook:"Pure-Houston firm; major TMC contractor; deeply civic", source:"https://www.linbeck.com/", li:"https://www.linkedin.com/company/linbeck", liContacts:[{n:"David Stueckler",t:"President & CEO",u:"https://www.linkedin.com/in/david-stueckler-797a6614/",w:"CEO; Linbeck built multiple Rice campus buildings"},{n:"Dan Wahle",t:"Vice President, Director of Cost Analyst Services",u:"https://www.linkedin.com/in/dan-wahle-29b17114/",w:"Houston preconstruction and estimating leader"},{n:"Becky Burleson",t:"Vice President and Sr. Client Executive",u:"https://www.linkedin.com/in/becky-burleson-99802b20/",w:"Client-facing VP, natural outreach recipient"}]},
+  {name:"Tellepsen", hq:"Houston, TX", sector:"Industrial", tier:"A", tx:"Marquee Houston GC; family-owned; deep TMC + industrial/institutional", asks:["Sponsorship","Speaker"], rice:"Houston HQ; family-owned local pillar", riceLevel:"strong", hook:"Family-owned Houston GC; civic-embedded", source:"https://www.tellepsen.com/", li:"https://www.linkedin.com/company/tellepsen", liContacts:[{n:"Howard Tellepsen",t:"CEO",u:"https://www.linkedin.com/in/howard-tellepsen-b81676149",w:"Fourth-generation family CEO, Houston institution"},{n:"Dave Hill",t:"Vice President / Project Executive",u:"https://www.linkedin.com/in/dave-hill-02b9681a",w:"Houston VP-level project executive"},{n:"David McKee",t:"Vice President Operations",u:"https://www.linkedin.com/in/david-mckee-06418b8b/",w:"Operations VP at Houston headquarters"}]},
+  {name:"The Beck Group", hq:"Dallas, TX", sector:"Industrial", tier:"B", tx:"$750M revenue / 1.1K employees; integrated design-build; Dallas HQ", asks:["Speaker","Recruiting"], rice:"Design-build innovation angle", riceLevel:"weak", hook:"Integrated design-build pioneer", source:"https://www.beckgroup.com/", li:"https://www.linkedin.com/company/the-beck-group", liContacts:[{n:"Candela Cicinelli",t:"Project Coordinator I, The Beck Group (M.Arch, Rice University)",u:"https://www.linkedin.com/in/candelacicinelli/",w:"Rice alumna at the firm"},{n:"Hailey Lynch",t:"Human Resources Coordinator",u:"https://www.linkedin.com/in/hailey-lynch/",w:"Coordinates college career-fair recruiting outreach"},{n:"Jeremy Sayre",t:"Preconstruction Manager",u:"https://www.linkedin.com/in/jeremy-sayre/",w:"Preconstruction, Dallas-Fort Worth based"}]},
+  {name:"Manhattan Construction (Rooney family)", hq:"Houston / Dallas, TX", sector:"Industrial", tier:"B", tx:"2025 ENR Best Projects submission (Union Pacific 4141 Locomotive / Marine One Pavilion, College Station)", asks:["Speaker","Recruiting"], rice:"TX family-owned", riceLevel:"weak", hook:"Rooney family ownership; high-profile institutional projects", source:"https://www.manhattanconstruction.com/", li:"https://www.linkedin.com/company/manhattan-construction-company", liContacts:[{n:"Andrea Nelson",t:"Vice President of Risk Management",u:"https://www.linkedin.com/in/andrea-nelson-bb035619/",w:"VP-level corporate leadership"},{n:"Jessica Allée",t:"Marketing / Business Development, Manhattan Construction Company",u:"https://www.linkedin.com/in/jessicajoyallee/",w:"BD role; natural external-relations counterpart"},{n:"Jason Fuller",t:"Manhattan Construction Company (Houston; Astros ballpark project background)",u:"https://www.linkedin.com/in/jason-fuller-64566413/",w:"Houston-based Manhattan project professional"}]},
+  {name:"Brasfield & Gorrie", hq:"Birmingham, AL", sector:"Industrial", tier:"B", tx:"#1 ENR Texas & Southeast GC; heavy TX healthcare/industrial", asks:["Recruiting","Speaker"], rice:"Major TX GC", riceLevel:"none", hook:"#1 ENR Texas GC", source:"https://www.brasfieldgorrie.com/", li:"https://www.linkedin.com/company/brasfield-&-gorrie-llc", liContacts:[{n:"Colin Peterson",t:"Campus Recruiting Team (Dallas)",u:"https://www.linkedin.com/in/colin-peterson-15809aa7/",w:"Leads campus/internship recruiting, Texas-based"},{n:"Alex Paulson",t:"HR Business Partner",u:"https://www.linkedin.com/in/alex-paulson-955879168/",w:"Runs university career fairs and campus interviews"},{n:"Reed Weigle",t:"Regional Vice President",u:"https://www.linkedin.com/in/reed-weigle-87400340/",w:"Regional VP; senior operations leadership"}]},
+  {name:"Rogers-O'Brien Construction", hq:"Dallas, TX (Houston + Austin)", sector:"Industrial", tier:"A", tx:"Tier-1 TX GC across all three majors", asks:["Recruiting","Speaker","Site visit"], rice:"Houston office accessible", riceLevel:"weak", hook:"All three TX major offices; broad project mix", source:"https://www.r-o.com/", li:"https://www.linkedin.com/company/rogersobrien", liContacts:[{n:"Cary Hughes",t:"Senior Vice President of Operations",u:"https://www.linkedin.com/in/cary-hughes-1815b792/",w:"SVP operations, senior Texas leadership"},{n:"Paul Johnson",t:"Senior Vice President",u:"https://www.linkedin.com/in/paul-johnson-8752677/",w:"SVP at Texas general contractor"},{n:"Jennifer Gonzales",t:"Houston office leadership, AMT sector (title unverified)",u:"https://www.linkedin.com/in/jennifer-gonzales-2a18b72b/",w:"Leads Houston office hiring, advanced manufacturing/tech"}]},
+  {name:"Bartlett Cocke General Contractors", hq:"San Antonio, TX", sector:"Industrial", tier:"B", tx:"Major TX GC; SA-HQ", asks:["Recruiting"], rice:"SA-based", riceLevel:"none", hook:"SA-HQ GC", source:"https://www.bartlettcocke.com/", li:"https://www.linkedin.com/company/bartlett-cocke-general-contractors", liContacts:[{n:"Robert Havins",t:"Director - Integrated Construction",u:"https://www.linkedin.com/in/robert-havins-4b8a2b115/",w:"Director-level, operations/VDC side"},{n:"Christopher Caddell",t:"Senior Estimator",u:"https://www.linkedin.com/in/christopher-caddell-4b13aa8/",w:"Preconstruction/estimating, Texas-based"},{n:"Barret Bostick",t:"Bartlett Cocke General Contractors (title not shown in results; Austin TX)",u:"https://www.linkedin.com/in/barretbostick/",w:"Surfaced in VP/preconstruction Houston search"}]},
+  {name:"TPG Real Estate", hq:"Fort Worth, TX", sector:"Industrial", tier:"A", tx:"TX-HQ PE real estate platform; co-invested with Cain International on TX deals", asks:["Speaker","Sponsorship"], rice:"TX-HQ PE — career path speaker gold", riceLevel:"weak", hook:"Fort Worth HQ PE real estate platform", source:"https://www.tpg.com/", li:"https://www.linkedin.com/company/tpg-capital", liContacts:[{n:"Seamus Comerford",t:"Vice President, TPG Real Estate",u:"https://www.linkedin.com/in/seamuscomerford/",w:"VP on real estate platform, DFW area"},{n:"Alexandria Guiam",t:"Vice President, TPG",u:"https://www.linkedin.com/in/alexandriaguiam/",w:"VP based in Dallas-Fort Worth Metroplex"},{n:"Avi Banyasz",t:"Co-Managing Partner, TPG Real Estate",u:"https://www.linkedin.com/in/avi-banyasz-4951121b2",w:"Co-heads the entire real estate platform"}]},
+  {name:"Apollo Global (Stream DC stake)", hq:"NY", sector:"Industrial", tier:"B", tx:"Aug 2025 majority stake in Stream Data Centers — direct TX DC exposure", asks:["Speaker","Sponsorship"], rice:"Mega-PE TX exposure via Stream", riceLevel:"none", hook:"Apollo's TX data center bet via Stream", source:"https://www.apollo.com/", li:"https://www.linkedin.com/company/apollo-global-management-inc", liContacts:[{n:"Emmett McComiskey",t:"Real Estate team, Apollo Global Management (exact title not shown in results)",u:"https://www.linkedin.com/in/emmett-mccomiskey/",w:"Rice University connection; Apollo real estate team"},{n:"Paul Sipio",t:"Managing Director",u:"https://www.linkedin.com/in/paul-sipio-apollo/",w:"Senior Apollo MD, approachable leadership contact"},{n:"Cascia Valenza, CPA",t:"Principal (recently promoted from Director)",u:"https://www.linkedin.com/in/cascia-valenza-cpa-963aa763/",w:"Director/Principal-level Apollo contact"}]},
+
+  // ===== HOUSTON / RICE ALUMNI =====
+  {name:"NewQuest Properties", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Houston HQ; grocery-anchored retail giant across TX/Southwest", asks:["Recruiting","Speaker"], rice:"President Austin Alvis is a Rice MBA — top-of-house Rice tie at major retail platform", riceLevel:"strong", hook:"Top REA opportunity: Rice MBA President at major institutional retail platform", source:"https://www.newquest.com/", contact:"Austin Alvis, President (Rice MBA)", li:"https://www.linkedin.com/company/newquest-properties", liContacts:[{n:"Austin Alvis",t:"President & Chief Development Officer",u:"https://www.linkedin.com/in/austin-alvis-0334511b/",w:"Rice MBA; president, primary outreach target"},{n:"Ruben Veloz",t:"NewQuest (title not confirmed)",u:"https://www.linkedin.com/in/ruben-veloz-175369a5/",w:"NewQuest profile surfaced in search; backup contact"}]},
+  {name:"Triten Real Estate Partners", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Houston; ~$2B AUM across industrial outdoor storage and multifamily ('sheds and beds')", asks:["Recruiting","Speaker"], rice:"Principal Zach Dobin is Rice MBA '20 — recent alum, very reachable", riceLevel:"strong", hook:"Junior-senior class proximity makes Zach Dobin a perfect REA touchpoint", source:"https://www.tritenre.com/", contact:"Zach Dobin (Rice MBA '20)", li:"https://www.linkedin.com/company/triten-real-estate-partners", liContacts:[{n:"Zach Dobin",t:"Principal",u:"https://www.linkedin.com/in/zach-dobin",w:"Rice MBA '20; principal, primary outreach target"}]},
+  {name:"1912 Ventures", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Houston full-service CRE brokerage, investment, advisory, development", asks:["Speaker","Recruiting"], rice:"Founded by Maury Bronstein, Rice '97; listed on Rice Business alumni businesses", riceLevel:"strong", hook:"Boutique with direct Rice alumni intro path", source:"https://www.1912ventures.com/", contact:"Maury Bronstein (Rice '97)", li:"https://www.linkedin.com/company/1912-ventures", liContacts:[{n:"Maury Bronstein",t:"Co-Founder & Partner",u:"https://www.linkedin.com/in/brons/",w:"Rice '97; co-founder, primary outreach target"},{n:"John S. Wall, Jr.",t:"Partner",u:null,w:"Co-founding partner; email on firm marketing docs"}]},
+  {name:"Davis Commercial Real Estate", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Houston brokerage — sale/acquisition/leasing/site selection", asks:["Speaker"], rice:"Founded by Mark Davis, Rice '89; featured on Rice Business alumni page", riceLevel:"strong", hook:"Obvious warm intro via Rice Business", source:"", contact:"Mark Davis (Rice '89)", li:"https://www.linkedin.com/company/davis-commercial-real-estate", liContacts:[{n:"Mark Davis",t:"Founder / Commercial Real Estate Broker-Developer",u:"https://www.linkedin.com/in/mark-davis-26204bb",w:"Rice MBA; founder, primary outreach target"}]},
+  {name:"Burloc Development Company", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Houston custom residential development and construction", asks:["Speaker"], rice:"Founded by Armistead Burks, Rice MBA '05 — engaged with Jones", riceLevel:"strong", hook:"Rice MBA alumnus actively engaged with Jones School", source:"", contact:"Armistead Burks (Rice MBA '05)", li:"https://www.linkedin.com/company/burloc-development-company", liContacts:[{n:"Armistead Burks",t:"Founder / Real Estate Developer & Consultant",u:"https://www.linkedin.com/in/armistead-burks-mba-5170402",w:"Rice MBA '05; founder, primary outreach target"}]},
+  {name:"Kavi Properties", hq:"Clear Lake, TX", sector:"Houston-Rice", tier:"A", tx:"Office-focused CRE investment and management", asks:["Speaker"], rice:"Founded by Neha Agrawal, Rice MBA '10", riceLevel:"strong", hook:"Smaller firm — founder likely responds personally", source:"", contact:"Neha Agrawal (Rice MBA '10)", li:"https://www.linkedin.com/company/kaviproperties", liContacts:[{n:"Neha Agrawal",t:"Founder",u:"https://www.linkedin.com/in/neha-agrawal-32bb598/",w:"Rice MBA '10; founder, Rice listed on profile"}]},
+  {name:"Wile Interests, Inc.", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"All-Texas investment firm founded 1991", asks:["Speaker","Recruiting"], rice:"Founder Randolph Wile is a Rice alumnus; founder still principal", riceLevel:"strong", hook:"Classic family-office pipeline; founder still principal and engaged", source:"", contact:"Randolph Wile (Rice alum)", li:"https://www.linkedin.com/company/wile-interests", liContacts:[{n:"Randolph Wile",t:"Founder / President",u:"https://www.linkedin.com/in/randolph-wile/",w:"Rice alum; founder, Rice listed on profile"}]},
+  {name:"Hanover Company", hq:"Houston, TX", sector:"Houston-Rice", tier:"A", tx:"Major Houston-HQ multifamily; built Hanover Rice Village + Hanover Southampton adjacent to campus", asks:["Speaker","Site visit","Recruiting"], rice:"Steffi Russell holds Rice BA in Math & Econ (cum laude with departmental honors); Hanover has Rice-adjacent assets", riceLevel:"strong", hook:"Built campus-adjacent product — shared-geography pitch is natural", source:"https://www.hanoverco.com/", contact:"Steffi Russell (Rice BA)", li:"https://www.linkedin.com/company/the-hanover-company", liContacts:[{n:"Steffi Russell",t:"The Hanover Company",u:"https://www.linkedin.com/in/steffi-russell-egbert/",w:"Rice BA Math/Econ; Rice listed on profile"}]},
+  {name:"Finger Companies / Marvy Finger Foundation", hq:"Houston, TX", sector:"Houston-Rice", tier:"B", tx:"Sold 20 assets to Greystar venture for $2B in 2021; foundation funds scholarships", asks:["Speaker"], rice:"Foundation channel for mentorship/info interviews", riceLevel:"medium", hook:"Built downtown Houston's first major residential tower; foundation as common-cause hook", source:"", li:"https://www.linkedin.com/company/the-finger-companies", liContacts:[{n:"John Schleider",t:"Developer (promoted to Vice President), The Finger Companies",u:"https://www.linkedin.com/in/john-schleider-86a47819/",w:"Houston development lead across TX projects"},{n:"Suan Tinsley",t:"Vice President of Operations, The Finger Companies",u:"https://www.linkedin.com/in/suan-tinsley-79b26117/",w:"Houston VP-level operations leader"},{n:"Hunter Wagner",t:"Multifamily management, The Finger Companies (exact title not shown in search)",u:"https://www.linkedin.com/in/hunter-wagner-638b882b/",w:"Houston-based, finance background, approachable"}]},
+  {name:"Pelican Builders", hq:"Houston, TX", sector:"Houston-Rice", tier:"B", tx:"Houston high-rise condo pioneer; builds West U/River Oaks/Rice-adjacent submarkets", asks:["Speaker"], rice:"Rice-adjacent submarkets; long-time HBA participant", riceLevel:"medium", hook:"Local-luxury condo case studies; small enough to respond", source:"http://www.pelicanbuilders.com/", li:"https://www.linkedin.com/company/pelican-builders-inc-", liContacts:[{n:"Drake Dominy",t:"Senior Vice President, Pelican Builders",u:"https://www.linkedin.com/in/drake-dominy-063b8223/",w:"Houston SVP, senior decision-maker"},{n:"John Anderson",t:"Associate, Pelican Builders",u:"https://www.linkedin.com/in/john-anderson-73118011/",w:"Houston junior staff, peer-level approachable"},{n:"Jacob Pierce",t:"Pelican Builders, Inc. (exact title not shown in search)",u:"https://www.linkedin.com/in/jacob-pierce-62a89ab/",w:"Houston-based team member"}]},
+  {name:"Sueba USA Corporation", hq:"Katy, TX", sector:"Houston-Rice", tier:"B", tx:">15M sf multifamily, 24M sf single-family, plus commercial; deep west Houston embed", asks:["Speaker"], rice:"Spanish-speaking student angle (Spanish ownership heritage)", riceLevel:"weak", hook:"Multifamily underwriting interest; rarely recruits publicly", source:"https://suebausa.com/", li:"https://www.linkedin.com/company/sueba-usa-corporation", liContacts:[{n:"Klaus Keller",t:"President, Sueba USA Corporation",u:"https://www.linkedin.com/in/klaus-keller-56151334/",w:"Houston firm president, small-firm direct access"},{n:"Nathan Smith",t:"Real Estate Development Manager, Sueba USA Corporation",u:"https://www.linkedin.com/in/nathan-smith-2542415b/",w:"Houston development manager, peer-level approachable"},{n:"Ileana Sepulveda",t:"Vice President - Human Resources, Sueba USA Corporation/Southhampton Management",u:"https://www.linkedin.com/in/southhamptonmanagement/",w:"HR VP, recruiting and internship gateway"}]},
+  {name:"Fidelis Realty Partners", hq:"Houston, TX", sector:"Houston-Rice", tier:"B", tx:"Houston; largest grocery-anchored retail portfolio in Houston; founded 2003 by Trammell Crow alumni", asks:["Recruiting","Speaker"], rice:"Lynn Davis is a 'Houston Power Woman' — female-mentor channel for REA", riceLevel:"medium", hook:"Trammell Crow alumni legacy = the Houston retail pipeline", source:"https://www.fidelisrp.com/", li:"https://www.linkedin.com/company/fidelis-realty-partners", liContacts:[{n:"Alan Hassenflu",t:"Co-founder, Fidelis Realty Partners",u:"https://www.linkedin.com/in/alan-hassenflu-4508685",w:"Houston co-founder and firm principal"},{n:"Lynn Davis",t:"Co-founder and Co-owner, Fidelis Realty Partners",u:"https://www.linkedin.com/in/lynn-davis-35b85311/",w:"Houston co-founder, senior principal"},{n:"David Lecky",t:"Vice President, Fidelis Realty Partners",u:"https://www.linkedin.com/in/david-lecky-5838736a/",w:"Houston VP, more approachable than founders"}]},
+  {name:"Read King", hq:"Houston, TX", sector:"Houston-Rice", tier:"B", tx:"Houston since 1991; >3M sf retail developed", asks:["Speaker"], rice:"Native-Houston firm; Rice local credibility plays well", riceLevel:"weak", hook:"Native-Houston founders; easier access than Big-4 brokerages", source:"https://read-king.com/", li:"https://www.linkedin.com/company/read-king-inc-", liContacts:[{n:"Jeff Read",t:"Principal, Read King",u:"https://www.linkedin.com/in/jeff-read-111bbb9/",w:"Co-founder principal, Houston native firm"},{n:"Tyler Brady",t:"Managing Director, Multifamily, Read King",u:"https://www.linkedin.com/in/tyler-brady-61279265/",w:"Houston MD over multifamily development"},{n:"Anthony Patronella",t:"Commercial Real Estate Broker, Read King, Inc.",u:"https://www.linkedin.com/in/anthony-patronella-2a146840/",w:"Houston broker, outward-facing role"}]},
+  {name:"Allen Harrison Company", hq:"Houston, TX", sector:"Houston-Rice", tier:"B", tx:"Houston (Katy Fwy); ~23,000 units across 19 markets, $6B in value", asks:["Recruiting","Speaker"], rice:"Likely Rice MBA recruiter; mid-size multifamily underwriting role", riceLevel:"medium", hook:"Mid-size multifamily underwriting role; growing platform", source:"https://allenharrison.com/", li:"https://www.linkedin.com/company/allen-harrison-company", liContacts:[{n:"Will Harper",t:"Principal, Allen Harrison Company",u:"https://www.linkedin.com/in/will-harper-2482191a/",w:"Houston co-founder and principal"},{n:"Meredith Monroe",t:"Director, Allen Harrison Company",u:"https://www.linkedin.com/in/meredith-monroe-a0350445/",w:"Houston director-level contact"},{n:"Sara Assaf, PHR",t:"HR professional, Allen Harrison Company",u:"https://www.linkedin.com/in/sara-assaf-phr/",w:"HR contact for recruiting conversations"}]},
+  {name:"Wulfe & Co.", hq:"Houston, TX", sector:"Houston-Rice", tier:"C", tx:"Houston retail (Gulfgate, Meyerland Plaza, BLVD Place)", asks:["Speaker"], rice:"Houston-civic retail mentorship via family channel", riceLevel:"weak", hook:"Wulfe family deeply civic; family-foundation channel", source:"https://www.wulfe.com/"},
+  {name:"Caldwell Companies", hq:"Cypress / The Woodlands, TX", sector:"Houston-Rice", tier:"C", tx:"Master-planned community giant (Towne Lake, The Highlands, Chambers Creek); founded 1990", asks:["Speaker","Site visit"], rice:"Hosts 'Real Estate Real Stories' podcast — student outreach content channel", riceLevel:"weak", hook:"Land development / MPC underwriting niche under-covered by REA", source:"https://caldwellcos.com/"},
+  {name:"Levcor, Inc.", hq:"Houston, TX", sector:"Houston-Rice", tier:"C", tx:"Founded 1980; ~20M sf acquired/managed; retail focus across SW/SE US", asks:["Speaker"], rice:"Cold outreach; value-add retail underwriting topic", riceLevel:"none", hook:"Post Oak Plaza / Washington corridor portfolio; quiet family-style platform", source:"https://www.levcor.com/"},
+  {name:"Welcome Group / GSL Welcome Group", hq:"Houston, TX", sector:"Houston-Rice", tier:"C", tx:"Houston; >115 industrial buildings, 7M sf in TX + Southeast", asks:["Speaker"], rice:"NOT Rice — Welcome Wilson family are UH loyalists; deprioritize", riceLevel:"none", hook:"Dominant single-tenant industrial owner in Houston, but UH-aligned", source:"https://www.welcomegroup.com/"},
+];
+
+// ===== STATE =====
+const STORAGE_KEY = 'rice-rea-outreach-status-v1';
+let outreachStatus = {};
+try { outreachStatus = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { outreachStatus = {}; }
+
+let currentSort = { col: 'tier', dir: 'asc' };
+let currentTab = 'prospects';
+
+// ===== HELPERS =====
+const TIER_ORDER = { 'A+': 0, 'A': 1, 'B': 2, 'C': 3 };
+const STATUS_LABELS = {
+  'none': 'Not started',
+  'research': 'Researching',
+  'contacted': 'Contacted',
+  'replied': 'Replied',
+  'confirmed': 'Confirmed'
+};
+const STATUS_ORDER = ['none','research','contacted','replied','confirmed'];
+
+function getStatus(id) { return outreachStatus[id] || 'none'; }
+function setStatus(id, status) {
+  if (status === 'none') delete outreachStatus[id];
+  else outreachStatus[id] = status;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(outreachStatus));
+  renderStats();
+  if (currentTab === 'pipeline') renderKanban();
+}
+
+function statusPillClass(s) {
+  return 'status-' + (s === 'none' ? 'none' : s);
+}
+
+function makeId(p) { return p.name.replace(/[^a-zA-Z0-9]/g,''); }
+
+// ===== STATS =====
+function renderStats() {
+  document.getElementById('stat-total').textContent = PROSPECTS.length;
+  const tierA = PROSPECTS.filter(p => p.tier === 'A' || p.tier === 'A+').length;
+  document.getElementById('stat-tier-a').textContent = tierA;
+  const rice = PROSPECTS.filter(p => p.riceLevel === 'strong' || p.riceLevel === 'medium').length;
+  document.getElementById('stat-rice').textContent = rice;
+  const houston = PROSPECTS.filter(p => p.hq.includes('Houston')).length;
+  document.getElementById('stat-houston').textContent = houston;
+  const siteVisit = PROSPECTS.filter(p => p.asks.includes('Site visit')).length;
+  document.getElementById('stat-sitevisit').textContent = siteVisit;
+  const active = PROSPECTS.filter(p => {
+    const s = getStatus(makeId(p));
+    return s && s !== 'none';
+  }).length;
+  document.getElementById('stat-active').textContent = active;
+}
+
+// ===== TABLE =====
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  const search = document.getElementById('search').value.toLowerCase();
+  const sector = document.getElementById('filter-sector').value;
+  const tier = document.getElementById('filter-tier').value;
+  const ask = document.getElementById('filter-ask').value;
+  const rice = document.getElementById('filter-rice').value;
+
+  let rows = PROSPECTS.filter(p => {
+    if (sector && p.sector !== sector) return false;
+    if (tier && p.tier !== tier) return false;
+    if (ask && !p.asks.includes(ask)) return false;
+    if (rice === 'strong' && p.riceLevel !== 'strong') return false;
+    if (rice === 'any' && (!p.riceLevel || p.riceLevel === 'none')) return false;
+    if (search) {
+      const hay = [p.name, p.hq, p.tx, p.rice, p.hook, p.contact || '', p.asks.join(' '), (p.liContacts||[]).map(c => c.n + ' ' + c.t).join(' ')].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // sort
+  rows.sort((a,b) => {
+    const c = currentSort.col;
+    let av, bv;
+    switch(c) {
+      case 'name': av = a.name.toLowerCase(); bv = b.name.toLowerCase(); break;
+      case 'sector': av = a.sector; bv = b.sector; break;
+      case 'tier': av = TIER_ORDER[a.tier] ?? 99; bv = TIER_ORDER[b.tier] ?? 99; break;
+      case 'tx': av = a.tx; bv = b.tx; break;
+      case 'ask': av = a.asks[0]; bv = b.asks[0]; break;
+      case 'rice':
+        const rL = { 'strong': 0, 'medium': 1, 'weak': 2, 'none': 3 };
+        av = rL[a.riceLevel] ?? 3; bv = rL[b.riceLevel] ?? 3; break;
+      case 'hook': av = a.hook; bv = b.hook; break;
+      case 'status': av = STATUS_ORDER.indexOf(getStatus(makeId(a))); bv = STATUS_ORDER.indexOf(getStatus(makeId(b))); break;
+      default: av = a.name; bv = b.name;
+    }
+    if (av < bv) return currentSort.dir === 'asc' ? -1 : 1;
+    if (av > bv) return currentSort.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  tbody.innerHTML = rows.map(p => {
+    const id = makeId(p);
+    const s = getStatus(id);
+    const riceBadge = p.riceLevel === 'strong' ? '<span class="rice-badge strong">Rice alum</span>' :
+                       p.riceLevel === 'medium' ? '<span class="rice-badge">Rice angle</span>' : '';
+    const askPills = p.asks.map(a => `<span class="ask-tag">${a}</span>`).join('');
+    return `
+      <tr onclick="openModal('${id}')" style="cursor:pointer">
+        <td class="company-cell">
+          <div>${p.name}</div>
+          <div class="hq">${p.hq}</div>
+        </td>
+        <td><span class="sector-pill sector-${p.sector.replace(/[^A-Za-z]/g,'')}">${p.sector}</span></td>
+        <td><span class="pill tier-${p.tier.replace('+','plus')}">${p.tier}</span></td>
+        <td class="tx-cell">${p.tx}</td>
+        <td>${askPills}</td>
+        <td class="rice-cell">${riceBadge}<div style="margin-top:${riceBadge?'4px':'0'};">${p.rice || '<span style="color:var(--muted)">—</span>'}</div></td>
+        <td class="notes-cell">${p.hook}</td>
+        <td onclick="event.stopPropagation()">
+          <select class="status-select ${statusPillClass(s)}" onchange="setStatus('${id}', this.value); renderTable();">
+            ${STATUS_ORDER.map(opt => `<option value="${opt}" ${opt===s?'selected':''}>${STATUS_LABELS[opt]}</option>`).join('')}
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--muted)">No prospects match these filters.</td></tr>`;
+  }
+}
+
+// ===== KANBAN =====
+function renderKanban() {
+  const kanban = document.getElementById('kanban');
+  kanban.innerHTML = STATUS_ORDER.map(s => {
+    const items = PROSPECTS.filter(p => getStatus(makeId(p)) === s);
+    return `
+      <div class="kanban-col">
+        <div class="kanban-header">
+          <span>${STATUS_LABELS[s]}</span>
+          <span class="kanban-count">${items.length}</span>
+        </div>
+        ${items.map(p => `
+          <div class="kanban-item" onclick="openModal('${makeId(p)}')" style="cursor:pointer">
+            <div class="company-name">${p.name}</div>
+            <div class="item-meta">${p.hq} · ${p.tier} · ${p.asks.slice(0,2).join(', ')}</div>
+          </div>
+        `).join('') || '<div style="color:var(--muted);font-size:12px;padding:8px;">None</div>'}
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== MODAL =====
+function openModal(id) {
+  const p = PROSPECTS.find(x => makeId(x) === id);
+  if (!p) return;
+  document.getElementById('modal-title').textContent = p.name;
+  const s = getStatus(id);
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-field"><div class="label">Headquarters</div><div class="value">${p.hq}</div></div>
+    <div class="modal-field"><div class="label">Sector / Tier</div>
+      <div class="value">
+        <span class="sector-pill sector-${p.sector.replace(/[^A-Za-z]/g,'')}">${p.sector}</span>
+        <span class="pill tier-${p.tier.replace('+','plus')}" style="margin-left:6px">Tier ${p.tier}</span>
+      </div>
+    </div>
+    <div class="modal-field"><div class="label">Texas Presence</div><div class="value">${p.tx}</div></div>
+    <div class="modal-field"><div class="label">Why Exciting / Hook</div><div class="value">${p.hook}</div></div>
+    <div class="modal-field"><div class="label">Rice / Houston Angle</div><div class="value">${p.rice || '—'}</div></div>
+    ${p.contact ? `<div class="modal-field"><div class="label">Key Contact</div><div class="value"><b>${p.contact}</b></div></div>` : ''}
+    ${p.li ? `<div class="modal-field"><div class="label">Company LinkedIn</div><div class="value"><a class="source-link" href="${p.li}" target="_blank" rel="noopener">${p.li.replace('https://www.linkedin.com','linkedin.com')}</a></div></div>` : ''}
+    ${p.liContacts && p.liContacts.length ? `<div class="modal-field"><div class="label">LinkedIn Contacts</div><div class="value">${p.liContacts.map(c => `<div style="margin-bottom:6px">${c.u ? `<a class="source-link" href="${c.u}" target="_blank" rel="noopener"><b>${c.n}</b></a>` : `<b>${c.n}</b> <span style="color:var(--muted)">(no public profile found)</span>`} — ${c.t}${c.w ? ` <span style="color:var(--muted)">· ${c.w}</span>` : ''}</div>`).join('')}</div></div>` : ''}
+    <div class="modal-field"><div class="label">Best Asks</div><div class="value">${p.asks.map(a => `<span class="ask-tag">${a}</span>`).join('')}</div></div>
+    ${p.source ? `<div class="modal-field"><div class="label">Reference</div><div class="value"><a class="source-link" href="${p.source}" target="_blank" rel="noopener">${p.source}</a></div></div>` : ''}
+    <div class="modal-section-title">Outreach Status</div>
+    <select class="status-select ${statusPillClass(s)}" style="font-size:13px; padding:8px 12px; min-width:200px;" onchange="setStatus('${id}', this.value); renderTable(); renderKanban(); openModal('${id}');">
+      ${STATUS_ORDER.map(opt => `<option value="${opt}" ${opt===s?'selected':''}>${STATUS_LABELS[opt]}</option>`).join('')}
+    </select>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+// ===== FILTER / SORT =====
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('filter-sector').value = '';
+  document.getElementById('filter-tier').value = '';
+  document.getElementById('filter-ask').value = '';
+  document.getElementById('filter-rice').value = '';
+  renderTable();
+}
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    if (currentSort.col === col) currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    else { currentSort.col = col; currentSort.dir = 'asc'; }
+    document.querySelectorAll('th[data-sort]').forEach(x => x.classList.remove('sorted-asc','sorted-desc'));
+    th.classList.add(currentSort.dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    renderTable();
+  });
+});
+
+['search','filter-sector','filter-tier','filter-ask','filter-rice'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+// ===== TABS =====
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    currentTab = t.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.getElementById('tab-' + t.dataset.tab).classList.remove('hidden');
+    if (currentTab === 'pipeline') renderKanban();
+  });
+});
+
+// ===== UTILS =====
+function copyText(id) {
+  const t = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(t).then(() => {
+    const b = event.target;
+    const orig = b.textContent;
+    b.textContent = 'Copied!';
+    setTimeout(() => b.textContent = orig, 1200);
+  });
+}
+
+function exportCSV() {
+  const rows = [['Company','HQ','Sector','Tier','Best Asks','Rice Angle','Contact','Texas Presence','Why Exciting','Status','Source']];
+  PROSPECTS.forEach(p => {
+    rows.push([p.name, p.hq, p.sector, p.tier, p.asks.join('; '), p.rice || '', p.contact || '', p.tx, p.hook, STATUS_LABELS[getStatus(makeId(p))], p.source || '']);
+  });
+  const csv = rows.map(r => r.map(c => `"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'rice-rea-prospects.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetStatus() {
+  if (!confirm('Reset all outreach status to "Not started"? This cannot be undone.')) return;
+  outreachStatus = {};
+  localStorage.removeItem(STORAGE_KEY);
+  renderStats(); renderTable();
+  if (currentTab === 'pipeline') renderKanban();
+}
+
+// ===== INIT =====
+document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+renderStats();
+renderTable();
+</script>
+</body>
+</html>
